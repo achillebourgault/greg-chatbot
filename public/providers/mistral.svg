@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <circle cx="32" cy="32" r="32" fill="#111827"/>
+  <circle cx="32" cy="32" r="30" fill="none" stroke="#ffffff" stroke-opacity="0.14"/>
+  <text x="32" y="38" text-anchor="middle" font-family="system-ui, -apple-system, Segoe UI, Roboto" font-size="18" font-weight="700" fill="#e5e7eb">MI</text>
+</svg>
