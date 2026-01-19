@@ -1,11 +1,9 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { Button } from "@/components/ui/Button";
-import { SearchBar } from "@/components/ui/SearchBar";
-import { Icons } from "@/components/ui/Icons";
+import { Button, Icons, SearchBar } from "@/components/ui";
 import { useChatStore } from "@/stores/chat-store";
-import { t, type UiLanguage } from "@/lib/i18n";
+import { intlLocale, t, type UiLanguage } from "@/i18n";
 import { useMemo, useState } from "react";
 
 function formatRelativeDate(timestamp: number, lang: UiLanguage, now: number): string {
@@ -14,11 +12,11 @@ function formatRelativeDate(timestamp: number, lang: UiLanguage, now: number): s
 	const hours = Math.floor(diff / 3600000);
 	const days = Math.floor(diff / 86400000);
 
-	if (minutes < 1) return lang === "fr" ? "À l'instant" : "Just now";
+	if (minutes < 1) return t(lang, "sidebar.justNow");
 	if (minutes < 60) return t(lang, "sidebar.lastUpdated", { minutes });
 	if (hours < 24) return t(lang, "sidebar.lastUpdated", { hours });
 	if (days < 7) return t(lang, "sidebar.lastUpdated", { days });
-	return new Date(timestamp).toLocaleDateString(lang === "fr" ? "fr-FR" : "en-US", {
+	return new Date(timestamp).toLocaleDateString(intlLocale(lang), {
 		day: "numeric",
 		month: "short",
 	});
@@ -90,10 +88,7 @@ export function Sidebar() {
 		].filter((g) => g.items.length > 0);
 	}, [filteredVisible, lang, now]);
 
-	const messageCountLabel = (count: number) => {
-		if (lang === "fr") return `${count} message${count > 1 ? "s" : ""}`;
-		return `${count} message${count === 1 ? "" : "s"}`;
-	};
+	const messageCountLabel = (count: number) => t(lang, "sidebar.messageCount", { count });
 
 	return (
 		<aside

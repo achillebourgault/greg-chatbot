@@ -1,11 +1,10 @@
 "use client";
 
 import { useMemo, useState, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/Button";
-import { Icons } from "@/components/ui/Icons";
-import { ModelPicker } from "@/components/chat/ModelPicker";
+import { Button, Icons } from "@/components/ui";
+import { ModelPicker } from "@/components/chat";
 import { useChatStore } from "@/stores/chat-store";
-import { t } from "@/lib/i18n";
+import { t } from "@/i18n";
 
 type Props = {
 	disabled?: boolean;
@@ -80,10 +79,10 @@ export function Composer({ disabled, isStreaming, onSend, onStop }: Props) {
 					</div>
 					<div className="hidden sm:flex items-center gap-3 text-[10px] text-zinc-600">
 						<span>
-							<kbd className="px-1.5 py-0.5 rounded bg-white/[0.03] border border-white/[0.08] font-mono">Enter</kbd> {t(lang, "composer.hint.send")}
+							<kbd className="px-1.5 py-0.5 rounded bg-white/[0.03] border border-white/[0.08] font-mono">{t(lang, "keys.enter")}</kbd> {t(lang, "composer.hint.send")}
 						</span>
 						<span>
-							<kbd className="px-1.5 py-0.5 rounded bg-white/[0.03] border border-white/[0.08] font-mono">Shift+Enter</kbd> {t(lang, "composer.hint.newline")}
+							<kbd className="px-1.5 py-0.5 rounded bg-white/[0.03] border border-white/[0.08] font-mono">{t(lang, "keys.shiftEnter")}</kbd> {t(lang, "composer.hint.newline")}
 						</span>
 					</div>
 				</div>
@@ -143,11 +142,11 @@ export function Composer({ disabled, isStreaming, onSend, onStop }: Props) {
 				{/* Hint (mobile) */}
 				<div className="flex sm:hidden items-center justify-center gap-4 mt-3">
 					<span className="text-[10px] text-zinc-600">
-						<kbd className="px-1.5 py-0.5 rounded bg-white/[0.03] border border-white/[0.08] font-mono">Enter</kbd>
+						<kbd className="px-1.5 py-0.5 rounded bg-white/[0.03] border border-white/[0.08] font-mono">{t(lang, "keys.enter")}</kbd>
 						{" "}{t(lang, "composer.hint.send")}
 					</span>
 					<span className="text-[10px] text-zinc-600">
-						<kbd className="px-1.5 py-0.5 rounded bg-white/[0.03] border border-white/[0.08] font-mono">Shift+Enter</kbd>
+						<kbd className="px-1.5 py-0.5 rounded bg-white/[0.03] border border-white/[0.08] font-mono">{t(lang, "keys.shiftEnter")}</kbd>
 						{" "}{t(lang, "composer.hint.newline")}
 					</span>
 				</div>

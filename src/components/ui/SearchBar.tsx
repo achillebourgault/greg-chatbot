@@ -9,7 +9,7 @@ type SearchBarProps = {
 	className?: string;
 };
 
-export function SearchBar({ value, onChange, placeholder = "Rechercher...", className = "" }: SearchBarProps) {
+export function SearchBar({ value, onChange, placeholder, className = "" }: SearchBarProps) {
 	const inputRef = useRef<HTMLInputElement>(null);
 	const [isFocused, setIsFocused] = useState(false);
 
@@ -49,7 +49,7 @@ export function SearchBar({ value, onChange, placeholder = "Rechercher...", clas
 					onChange={(e) => onChange(e.target.value)}
 					onFocus={() => setIsFocused(true)}
 					onBlur={() => setIsFocused(false)}
-					placeholder={placeholder}
+					placeholder={placeholder ?? ""}
 					className="flex-1 bg-transparent text-sm text-zinc-100 placeholder-zinc-500 outline-none"
 				/>
 				

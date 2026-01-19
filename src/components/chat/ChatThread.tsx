@@ -2,13 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useChatStore, getModelDisplayName, extractSuggestedTitle, type ChatMessage } from "@/stores/chat-store";
-import { Icons } from "@/components/ui/Icons";
-import { Button } from "@/components/ui/Button";
-import { Skeleton } from "@/components/ui/Skeleton";
-import { Markdown } from "@/components/ui/Markdown";
-import { DinoLoader } from "@/components/ui/DinoLoader";
-import { SourceCards } from "@/components/ui/SourceCards";
-import { t, type UiLanguage } from "@/lib/i18n";
+import { Button, DinoLoader, Icons, Markdown, Skeleton, SourceCards } from "@/components/ui";
+import { t, type UiLanguage } from "@/i18n";
 
 function CopyButton({ content, title }: { content: string; title: string }) {
 	const [copied, setCopied] = useState(false);
@@ -273,18 +268,16 @@ function splitInlineSources(content: string): { before: string; sources: string[
 
 
 function phaseLoaderLine(phase: ProgressPhase, lang: UiLanguage, url?: string) {
-	const fr = lang === "fr";
 	const u = formatProgressUrl(url, 72);
-	const target = u ? (fr ? ` sur ${u}` : ` on ${u}`) : "";
 	switch (phase) {
 		case "search":
-			return fr ? "Recherche internet en cours…" : "Searching the web…";
+			return t(lang, "progress.phase.search");
 		case "fetch":
-			return (fr ? "Récupération de la page" : "Fetching page") + target + "…";
+			return t(lang, "progress.phase.fetch", { url: u });
 		case "read":
-			return (fr ? "Lecture / extraction" : "Reading / extracting") + target + "…";
+			return t(lang, "progress.phase.read", { url: u });
 		case "write":
-			return fr ? "Rédaction de la réponse…" : "Writing the answer…";
+			return t(lang, "progress.phase.write");
 	}
 }
 
@@ -306,9 +299,7 @@ function Bubble({ message, showModelFooter, copyTitle, restartTitle, onRestartFr
 	const showDinoLoader = Boolean(showProgress && showToolProgress);
 	const dinoSubtitle = phaseInfo
 		? phaseLoaderLine(phaseInfo.phase, lang, phaseInfo.url)
-		: lang === "fr"
-			? "Génération en cours…"
-			: "Generating…";
+		: t(lang, "progress.generating");
 	const loaderOnly = showDinoLoader && !hasAssistantContent;
 	const [showSkeleton, setShowSkeleton] = useState(false);
 	useEffect(() => {
@@ -441,19 +432,12 @@ function Bubble({ message, showModelFooter, copyTitle, restartTitle, onRestartFr
 function WelcomeMessage() {
 	const { state } = useChatStore();
 	const lang = state.settings.uiLanguage;
-	const suggestions = lang === "fr"
-		? [
-			{ icon: "💡", text: "Explique-moi un concept complexe" },
-			{ icon: "✍️", text: "Aide-moi à rédiger un texte" },
-			{ icon: "🔧", text: "Debug mon code" },
-			{ icon: "🎨", text: "Donne-moi des idées créatives" },
-		]
-		: [
-			{ icon: "💡", text: "Explain a complex concept" },
-			{ icon: "✍️", text: "Help me write a text" },
-			{ icon: "🔧", text: "Debug my code" },
-			{ icon: "🎨", text: "Give me creative ideas" },
-		];
+	const suggestions = [
+		{ icon: "💡", text: t(lang, "thread.suggestion.explain") },
+		{ icon: "✍️", text: t(lang, "thread.suggestion.write") },
+		{ icon: "🔧", text: t(lang, "thread.suggestion.debug") },
+		{ icon: "🎨", text: t(lang, "thread.suggestion.ideas") },
+	];
 
 	return (
 		<div className="flex flex-col items-center justify-center py-16 px-4 animate-in fade-in duration-500">

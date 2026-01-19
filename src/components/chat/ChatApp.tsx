@@ -6,7 +6,7 @@ import { Sidebar, ChatThread, Composer, ProviderStack } from "@/components/chat"
 import { Button, Icons } from "@/components/ui";
 import { streamChatCompletion } from "@/lib/client/openrouter";
 import { conversationToMarkdown, copyTextToClipboard } from "@/lib/client/chatExport";
-import { t } from "@/lib/i18n";
+import { t } from "@/i18n";
 import { 
 	ChatProvider, 
 	useChatStore, 
@@ -155,7 +155,7 @@ function ChatAppInner() {
 					setMessageContent(
 						conversationId,
 						assistantMessageId,
-						lang === "fr" ? `❌ Erreur: ${message}` : `❌ Error: ${message}`,
+						t(lang, "errors.request", { message }),
 					);
 				}
 			} finally {

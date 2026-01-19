@@ -13,7 +13,7 @@ export type GregPersonality = {
 	playfulness: GregPlayfulness;
 };
 
-const DEFAULT_FILE = "DEFAULT_GREG_INSTRUCTIONS.md";
+const DEFAULT_FILE = "src/instructions/DEFAULT_GREG_INSTRUCTIONS.md";
 
 function cwdPath(file: string) {
 	return path.join(process.cwd(), file);

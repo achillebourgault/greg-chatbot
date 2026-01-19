@@ -1,4 +1,4 @@
-import { DEFAULT_UI_LANGUAGE, t, type UiLanguage } from "@/lib/i18n";
+import { DEFAULT_UI_LANGUAGE, normalizeUiLanguage as normalizeUiLanguageFromI18n, t, type UiLanguage } from "@/i18n";
 import type { Conversation, GregSettings, ModelStats } from "./types";
 
 export const STORAGE_KEY = "greg-chatbot:v2";
@@ -50,7 +50,7 @@ export function newFallbackConversation(settings: GregSettings): Conversation {
 }
 
 export function normalizeUiLanguage(value: unknown): UiLanguage {
-	return value === "fr" || value === "en" ? value : DEFAULT_UI_LANGUAGE;
+	return normalizeUiLanguageFromI18n(value);
 }
 
 // Helper pour extraire le titre suggéré du contenu

@@ -3,8 +3,9 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { approxTokens, getProviderInfo, providerFromModelId } from "@/lib/providers";
-import { getModelDisplayName, type Conversation } from "@/stores/chat-store";
+import { getModelDisplayName, type Conversation, useChatStore } from "@/stores/chat-store";
 import { fetchModels, type ModelListItem } from "@/lib/client/openrouter";
+import { t } from "@/i18n";
 
 type Pricing = { promptPerToken: number | null; completionPerToken: number | null };
 
@@ -90,6 +91,8 @@ function ProviderIcon({
 }
 
 export function ProviderStack({ conversation }: { conversation: Conversation }) {
+	const { state } = useChatStore();
+	const lang = state.settings.uiLanguage;
 	const { map: pricingMap, ready } = useModelPricingMap();
 
 	const usage = useMemo((): ProviderUsage[] => {
@@ -185,9 +188,9 @@ export function ProviderStack({ conversation }: { conversation: Conversation }) 
 			<div className="pointer-events-none opacity-0 group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 absolute left-0 top-full mt-2 w-[360px] z-50">
 				<div className="rounded-xl bg-zinc-900 border border-white/[0.10] shadow-xl shadow-black/50 overflow-hidden">
 					<div className="px-4 py-3 border-b border-white/[0.06]">
-						<div className="text-sm font-medium text-zinc-100">Agents used</div>
+						<div className="text-sm font-medium text-zinc-100">{t(lang, "providerStack.title")}</div>
 						<div className="text-[11px] text-zinc-500 mt-0.5">
-							Estimated cost (heuristic). {ready ? "" : "(Loading pricing…)"}
+							{t(lang, "providerStack.subtitle", { loadingPricing: !ready })}
 						</div>
 					</div>
 					<div className="p-2 max-h-[340px] overflow-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10">
@@ -211,7 +214,7 @@ export function ProviderStack({ conversation }: { conversation: Conversation }) 
 										</div>
 									</div>
 									<div className="text-[13px] text-zinc-200 flex-shrink-0">
-										{m.free ? "Free" : formatMoneyUsd(m.totalUsd)}
+										{m.free ? t(lang, "modelPicker.badge.free") : formatMoneyUsd(m.totalUsd)}
 									</div>
 								</div>
 							</div>

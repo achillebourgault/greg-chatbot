@@ -1,4 +1,4 @@
-import type { UiLanguage } from "@/lib/i18n";
+import type { UiLanguage } from "@/i18n";
 
 export type ChatRole = "system" | "user" | "assistant";
 

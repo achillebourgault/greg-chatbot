@@ -64,7 +64,7 @@ function clamp(n: number, min: number, max: number) {
 	return Math.max(min, Math.min(max, n));
 }
 
-function DinoRunner() {
+function DinoRunner({ ariaLabel, hudText }: { ariaLabel: string; hudText: string }) {
 	const WIDTH = 860;
 	const HEIGHT = 160;
 	const GROUND_Y = 128;
@@ -311,7 +311,7 @@ function DinoRunner() {
 	}, [rng]);
 
 	return (
-		<svg ref={svgRef} viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="w-full h-[160px]" role="img" aria-label="Loading">
+		<svg ref={svgRef} viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="w-full h-[160px]" role="img" aria-label={ariaLabel}>
 			<style>{`
 				:root { color-scheme: dark; }
 				svg[data-theme="day"] .bg { fill: transparent; }
@@ -441,7 +441,7 @@ function DinoRunner() {
 
 			{/* HUD */}
 			<text ref={hudRef} x={WIDTH - 320} y="22" className="hud">
-				RUNNING • AI never loses
+				{hudText}
 			</text>
 		</svg>
 	);
@@ -455,7 +455,7 @@ export function DinoLoader({ className, subtitle }: Props) {
 			.join(" ")}
 		>
 			<div className="p-4">
-				<DinoRunner />
+				<DinoRunner ariaLabel={subtitle} hudText={subtitle} />
 				<div className="mt-3 text-sm text-zinc-300">{subtitle}</div>
 			</div>
 		</div>

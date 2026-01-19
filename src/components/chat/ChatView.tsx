@@ -2,14 +2,11 @@
 
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChatThread } from "@/components/chat/ChatThread";
-import { Composer } from "@/components/chat/Composer";
-import { ProviderStack } from "@/components/chat/ProviderStack";
-import { Button } from "@/components/ui/Button";
-import { Icons } from "@/components/ui/Icons";
+import { ChatThread, Composer, ProviderStack } from "@/components/chat";
+import { Button, Icons } from "@/components/ui";
 import { streamChatCompletion } from "@/lib/client/openrouter";
 import { conversationToMarkdown, copyTextToClipboard } from "@/lib/client/chatExport";
-import { t } from "@/lib/i18n";
+import { t } from "@/i18n";
 import { useChatStore, extractSuggestedTitle } from "@/stores/chat-store";
 
 export function ChatView() {
@@ -138,7 +135,7 @@ export function ChatView() {
 					setMessageContent(
 						conversationId,
 						assistantMessageId,
-						lang === "fr" ? `❌ Erreur: ${message}` : `❌ Error: ${message}`,
+						t(lang, "errors.request", { message }),
 					);
 				}
 			} finally {
@@ -201,7 +198,7 @@ export function ChatView() {
 						size="icon"
 						onClick={() => router.push("/settings")}
 						className="text-zinc-400 hover:text-zinc-100"
-						title="Settings"
+						title={t(lang, "actions.settings")}
 					>
 						<Icons.settings className="w-4 h-4" />
 					</Button>

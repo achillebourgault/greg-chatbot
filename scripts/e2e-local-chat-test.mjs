@@ -17,7 +17,7 @@ async function waitForServer(url, timeoutMs = 15000) {
 }
 
 async function main() {
-	const prompt = process.argv.slice(2).join(" ") || "C quoi la derniere video d'underscore sur youtube";
+	const prompt = process.argv.slice(2).join(" ") || "Derniere video d'underscore sur youtube ?";
 	await waitForServer("http://localhost:3000/api/openrouter/models", 20000);
 
 	const body = {

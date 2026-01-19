@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { LinkCard } from "@/components/ui/LinkCard";
-import type { UiLanguage } from "@/lib/i18n";
+import { LinkCard } from "@/components/ui";
+import { t, type UiLanguage } from "@/i18n";
 
 function normalizeUrl(u: string) {
 	return u
@@ -44,13 +44,12 @@ export function SourceCards({ urls, lang, maxInitial = 3 }: { urls: string[]; la
 	if (filtered.length === 0) return null;
 	const shown = expanded ? filtered : filtered.slice(0, Math.max(1, maxInitial));
 	const remaining = Math.max(0, filtered.length - shown.length);
-	const fr = lang === "fr";
 
 	return (
 		<div className="mt-3 pt-3 border-t border-white/[0.06]">
 			<div className="flex items-center justify-between gap-3">
 				<div className="text-[11px] uppercase tracking-wide text-zinc-500">
-					{fr ? "Sources" : "Sources"}
+					{t(lang, "sourceCards.title")}
 				</div>
 				{remaining > 0 ? (
 					<button
@@ -58,7 +57,7 @@ export function SourceCards({ urls, lang, maxInitial = 3 }: { urls: string[]; la
 						onClick={() => setExpanded(true)}
 						className="text-[12px] text-zinc-400 hover:text-zinc-200 transition-colors"
 					>
-						{fr ? `Afficher ${remaining} de plus` : `Show ${remaining} more`}
+						{t(lang, "sourceCards.showMore", { count: remaining })}
 					</button>
 				) : null}
 			</div>

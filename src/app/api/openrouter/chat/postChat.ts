@@ -1,6 +1,7 @@
 import { buildSystemPrompt } from "@/lib/server/gregInstructions";
 import { buildUrlContextBlock, extractUrlsFromText } from "@/lib/server/urlAnalysis";
 import { searchWebUrls } from "@/lib/server/webSearch";
+import { normalizeUiLanguage, t } from "@/i18n";
 import { parseChatRequest } from "./_lib/request";
 import { createSseStream, PHASE_FETCH, PHASE_READ, PHASE_SEARCH, PHASE_WRITE, phase, sseResponse } from "./_lib/sse";
 import { decideWebAction, refineWebQuery } from "./_lib/webGate";
@@ -42,7 +43,8 @@ export async function postChat(req: Request) {
 			})();
 
 			const uiLang = (req.headers.get("x-ui-language") ?? "").toLowerCase();
-			const fr = uiLang === "fr";
+			const uiLanguage = normalizeUiLanguage(uiLang);
+			const fr = uiLanguage === "fr";
 
 			// Flush the SSE stream quickly so the UI can show a skeleton immediately.
 			await sse.writeDelta("");
@@ -79,7 +81,7 @@ export async function postChat(req: Request) {
 						systemPrompt,
 						nonSystemMessages,
 						lastUserMessage,
-						uiLanguage: uiLang,
+						uiLanguage,
 					});
 					if (gate.type === "search_web") {
 						gateRequestedWeb = true;
@@ -92,11 +94,11 @@ export async function postChat(req: Request) {
 			if (urls.length) {
 				sse.briefStatusEnabled = true;
 				await sse.writeStatus(
-					fr ? `Analyse de source${urls.length > 1 ? "s" : ""} (${urls.length})…` : `Analyzing source${urls.length > 1 ? "s" : ""} (${urls.length})…`,
+					t(uiLanguage, "status.analyzingSources", { count: urls.length }),
 					"brief",
 				);
 				await sse.writeStatus(
-					fr ? `URLs détectées: ${urls.length}. Démarrage de l'analyse…` : `Detected URLs: ${urls.length}. Starting analysis…`,
+					t(uiLanguage, "status.detectedUrlsStartingAnalysis", { count: urls.length }),
 					"detailed",
 				);
 
@@ -133,7 +135,7 @@ export async function postChat(req: Request) {
 						systemPrompt,
 						nonSystemMessages,
 						lastUserMessage,
-						uiLanguage: uiLang,
+						uiLanguage,
 						previousQuery: query,
 					});
 					if (!refined || refined === query) break;
@@ -142,7 +144,7 @@ export async function postChat(req: Request) {
 				}
 
 				if (!toolUrls.length) {
-					await sse.writeDelta(fr ? "\n\n⚠️ Aucune source trouvée." : "\n\n⚠️ No sources found.");
+					await sse.writeDelta(`\n\n${t(uiLanguage, "warnings.noSourcesFound")}`);
 					await sse.writeDone();
 					return;
 				}
@@ -166,7 +168,7 @@ export async function postChat(req: Request) {
 				model: body.model,
 				systemPrompt: effectiveSystemPrompt,
 				nonSystemMessages,
-				uiLanguage: uiLang,
+				uiLanguage,
 				fr,
 				writeDelta: sse.writeDelta,
 				writeStatus: sse.writeStatus,
@@ -186,7 +188,7 @@ export async function postChat(req: Request) {
 							systemPrompt,
 							nonSystemMessages,
 							lastUserMessage,
-							uiLanguage: uiLang,
+							uiLanguage,
 							previousQuery: query,
 						});
 						if (!refined || refined === query) break;
@@ -195,7 +197,7 @@ export async function postChat(req: Request) {
 					}
 
 					if (!toolUrls.length) {
-						await sse.writeDelta(fr ? "\n\n⚠️ Aucune source trouvée." : "\n\n⚠️ No sources found.");
+						await sse.writeDelta(`\n\n${t(uiLanguage, "warnings.noSourcesFound")}`);
 						return null;
 					}
 

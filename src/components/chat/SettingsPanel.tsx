@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button, Icons, TextArea } from "@/components/ui";
 import { useChatStore, type GregPersonality, type GregTone, type GregVerbosity, type GregGuidance, type GregPlayfulness } from "@/stores/chat-store";
-import { t, type UiLanguage } from "@/lib/i18n";
+import { t, UI_LANGUAGES } from "@/i18n";
 
 type Props = {
 	isOpen: boolean;
@@ -88,46 +88,30 @@ export function SettingsPanel({ isOpen, onClose }: Props) {
 
 	if (!isOpen) return null;
 
-	const toneOptions: Array<{ id: GregTone; title: string; description: string }> =
-		lang === "fr"
-			? [
-					{ id: "professional", title: "Pro", description: "Carré, structuré, fiable." },
-					{ id: "friendly", title: "Friendly", description: "Chaleureux, mais efficace." },
-					{ id: "direct", title: "Direct", description: "Court, net, actionnable." },
-				]
-			: [
-					{ id: "professional", title: "Pro", description: "Structured, reliable, no fluff." },
-					{ id: "friendly", title: "Friendly", description: "Warm, but still efficient." },
-					{ id: "direct", title: "Direct", description: "Short, sharp, actionable." },
-				];
+	const toneOptions: Array<{ id: GregTone; title: string; description: string }> = [
+		{
+			id: "professional",
+			title: t(lang, "settings.tone.professional.title"),
+			description: t(lang, "settings.tone.professional.desc"),
+		},
+		{ id: "friendly", title: t(lang, "settings.tone.friendly.title"), description: t(lang, "settings.tone.friendly.desc") },
+		{ id: "direct", title: t(lang, "settings.tone.direct.title"), description: t(lang, "settings.tone.direct.desc") },
+	];
 
 	type Option<T extends string> = { id: T; title: string; description: string };
-	const verbosityOptions: Option<GregVerbosity>[] =
-		lang === "fr"
-			? [
-					{ id: "minimal", title: "Minimal", description: "Juste l'essentiel." },
-					{ id: "balanced", title: "Balanced", description: "Concis mais complet." },
-					{ id: "detailed", title: "Detailed", description: "Détaillé + étapes." },
-				]
-			: [
-					{ id: "minimal", title: "Minimal", description: "Just the essentials." },
-					{ id: "balanced", title: "Balanced", description: "Concise, but complete." },
-					{ id: "detailed", title: "Detailed", description: "More detail + step-by-step." },
-				];
+	const verbosityOptions: Option<GregVerbosity>[] = [
+		{ id: "minimal", title: t(lang, "settings.verbosity.minimal.title"), description: t(lang, "settings.verbosity.minimal.desc") },
+		{ id: "balanced", title: t(lang, "settings.verbosity.balanced.title"), description: t(lang, "settings.verbosity.balanced.desc") },
+		{ id: "detailed", title: t(lang, "settings.verbosity.detailed.title"), description: t(lang, "settings.verbosity.detailed.desc") },
+	];
 	const guidanceOptions: Option<GregGuidance>[] = [
 		{ id: "neutral", title: t(lang, "settings.guidance.neutral.title"), description: t(lang, "settings.guidance.neutral.desc") },
 		{ id: "coach", title: t(lang, "settings.guidance.coach.title"), description: t(lang, "settings.guidance.coach.desc") },
 	];
-	const playfulOptions: Option<GregPlayfulness>[] =
-		lang === "fr"
-			? [
-					{ id: "none", title: "None", description: "Pas de fun, 100% pro." },
-					{ id: "light", title: "Light", description: "Léger, jamais enfantin." },
-				]
-			: [
-					{ id: "none", title: "None", description: "No jokes, fully professional." },
-					{ id: "light", title: "Light", description: "A touch of humor, never childish." },
-				];
+	const playfulOptions: Option<GregPlayfulness>[] = [
+		{ id: "none", title: t(lang, "settings.playfulness.none.title"), description: t(lang, "settings.playfulness.none.desc") },
+		{ id: "light", title: t(lang, "settings.playfulness.light.title"), description: t(lang, "settings.playfulness.light.desc") },
+	];
 
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -169,11 +153,11 @@ export function SettingsPanel({ isOpen, onClose }: Props) {
 								<div>
 									<h3 className="text-sm font-semibold text-zinc-100">{t(lang, "settings.language")}</h3>
 									<p className="text-xs text-zinc-500 mt-1">
-										{lang === "fr" ? "EN par défaut." : "EN is the default."}
+										{t(lang, "settings.language.defaultHint")}
 									</p>
 								</div>
 								<div className="flex items-center gap-1">
-									{(["en", "fr"] as UiLanguage[]).map((l) => (
+									{UI_LANGUAGES.map((l) => (
 										<button
 											key={l}
 											type="button"
@@ -291,14 +275,14 @@ export function SettingsPanel({ isOpen, onClose }: Props) {
 								value={customInstructions}
 								onChange={(e) => setCustomInstructions(e.target.value)}
 								className="min-h-[340px] font-mono text-xs leading-relaxed"
-								placeholder={lang === "fr" ? "(optionnel) Ajoute des règles spécifiques à ce projet…" : "(optional) Add project-specific rules…"}
+								placeholder={t(lang, "settings.instructions.placeholder.panel")}
 								disabled={loading}
 							/>
 
 							<div className="flex items-center justify-between gap-3">
 								<div className="text-xs text-zinc-500">
-									{lang === "fr" ? "Toujours actifs:" : "Always active:"}{" "}
-									<span className="text-zinc-300">DEFAULT_GREG_INSTRUCTIONS + Creator</span>
+									{t(lang, "settings.instructions.alwaysActive")}{" "}
+									<span className="text-zinc-300">{t(lang, "settings.instructions.alwaysActiveItems")}</span>
 								</div>
 								{error ? <div className="text-xs text-red-300">{error}</div> : null}
 							</div>
@@ -306,12 +290,9 @@ export function SettingsPanel({ isOpen, onClose }: Props) {
 							<div className="flex gap-3 p-4 rounded-xl bg-white/[0.03] border border-white/[0.06]">
 								<Icons.sparkles className="w-5 h-5 text-zinc-400 flex-shrink-0 mt-0.5" />
 								<div className="text-xs text-zinc-400 leading-relaxed">
-									<p className="font-medium text-zinc-200 mb-1">{lang === "fr" ? "Note" : "Note"}</p>
+									<p className="font-medium text-zinc-200 mb-1">{t(lang, "settings.instructions.noteTitle")}</p>
 									<p>
-										{lang === "fr"
-											? "Les instructions par défaut ne sont pas éditées ici. Pour changer la base, édite le fichier "
-											: "Default instructions aren’t edited here. To change the base, edit "}
-										<span className="text-zinc-200">DEFAULT_GREG_INSTRUCTIONS.md</span>.
+										{t(lang, "settings.instructions.noteBody", { filePath: "src/instructions/DEFAULT_GREG_INSTRUCTIONS.md" })}
 									</p>
 								</div>
 							</div>
@@ -345,13 +326,13 @@ export function SettingsPanel({ isOpen, onClose }: Props) {
 						{saved && (
 							<div className="flex items-center gap-2 text-zinc-300 text-sm animate-in fade-in duration-200">
 								<Icons.check className="w-4 h-4" />
-								{lang === "fr" ? "Sauvegardé" : "Saved"}
+								{t(lang, "status.saved.long")}
 							</div>
 						)}
 					</div>
 					<div className="flex items-center gap-3">
 						<Button variant="secondary" onClick={onClose} disabled={loading}>
-							{lang === "fr" ? "Annuler" : "Cancel"}
+							{t(lang, "actions.cancel")}
 						</Button>
 						<Button variant="primary" onClick={handleSave} disabled={loading}>
 							{t(lang, "settings.save")}

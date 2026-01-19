@@ -1,4 +1,4 @@
-import { t } from "@/lib/i18n";
+import { t } from "@/i18n";
 import {
 	DEFAULT_MODEL,
 	bumpModelStats,
@@ -98,7 +98,7 @@ export function reducer(state: ChatState, action: Action): ChatState {
 
 			const ts = now();
 			const lang = state.settings.uiLanguage;
-			const suffix = lang === "fr" ? " (branche)" : " (branch)";
+			const suffix = t(lang, "conversation.branchSuffix");
 			let baseTitle = (source.title || t(lang, "actions.newChat")).trim();
 			while (baseTitle.endsWith(suffix)) baseTitle = baseTitle.slice(0, -suffix.length).trimEnd();
 			const nextTitle = `${baseTitle}${suffix}`.slice(0, 120);
@@ -129,7 +129,7 @@ export function reducer(state: ChatState, action: Action): ChatState {
 
 			const ts = now();
 			const lang = state.settings.uiLanguage;
-			const suffix = lang === "fr" ? " (branche)" : " (branch)";
+			const suffix = t(lang, "conversation.branchSuffix");
 			let baseTitle = (source.title || t(lang, "actions.newChat")).trim();
 			while (baseTitle.endsWith(suffix)) baseTitle = baseTitle.slice(0, -suffix.length).trimEnd();
 			const nextTitle = `${baseTitle}${suffix}`.slice(0, 120);
@@ -179,11 +179,14 @@ export function reducer(state: ChatState, action: Action): ChatState {
 					action.message.role === "assistant" && action.message.model
 						? bumpModelStats(state.modelStats, action.message.model)
 						: state.modelStats,
-				conversations: state.conversations.map((c) =>
-					c.id === action.id
-						? { ...c, messages: [...c.messages, action.message], updatedAt: now() }
-						: c,
-				),
+				conversations: state.conversations.map((c) => {
+					if (c.id !== action.id) return c;
+					const existingIds = new Set(c.messages.map((m) => m.id));
+					const message = existingIds.has(action.message.id)
+						? { ...action.message, id: newId() }
+						: action.message;
+					return { ...c, messages: [...c.messages, message], updatedAt: now() };
+				}),
 			};
 		case "setMessageContent":
 			return {

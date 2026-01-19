@@ -3,9 +3,9 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { fetchModels, type ModelListItem } from "@/lib/client/openrouter";
-import { Icons } from "@/components/ui/Icons";
+import { Icons } from "@/components/ui";
 import { getModelDisplayName, useChatStore } from "@/stores/chat-store";
-import { t, type UiLanguage } from "@/lib/i18n";
+import { t, type UiLanguage } from "@/i18n";
 
 type Props = {
 	value: string;

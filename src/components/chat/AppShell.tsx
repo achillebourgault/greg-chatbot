@@ -1,7 +1,7 @@
 "use client";
 
 import { ChatProvider } from "@/stores/chat-store";
-import { Sidebar } from "@/components/chat/Sidebar";
+import { Sidebar } from "@/components/chat";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
 	return (

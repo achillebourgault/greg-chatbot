@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Spinner } from "@/components/ui/Spinner";
+import { Spinner } from "@/components/ui";
 
 type UrlAnalysisResult = {
 	url: string;
