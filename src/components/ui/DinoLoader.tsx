@@ -5,6 +5,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 type Props = {
 	className?: string;
 	subtitle: string;
+	tokens?: number;
 };
 
 type ObstacleKind = "cactusTiny" | "cactusSmall" | "cactusBig" | "cactusCluster" | "birdLow" | "birdHigh";
@@ -64,7 +65,7 @@ function clamp(n: number, min: number, max: number) {
 	return Math.max(min, Math.min(max, n));
 }
 
-function DinoRunner({ ariaLabel, hudText }: { ariaLabel: string; hudText: string }) {
+function DinoRunner({ ariaLabel, hudRightText }: { ariaLabel: string; hudRightText: string }) {
 	const WIDTH = 860;
 	const HEIGHT = 160;
 	const GROUND_Y = 128;
@@ -78,7 +79,13 @@ function DinoRunner({ ariaLabel, hudText }: { ariaLabel: string; hudText: string
 	const cloudARef = useRef<SVGGElement | null>(null);
 	const cloudBRef = useRef<SVGGElement | null>(null);
 	const slotRefs = useRef<Array<SVGGElement | null>>([null, null, null]);
-	const hudRef = useRef<SVGTextElement | null>(null);
+	const hudLeftRef = useRef<SVGTextElement | null>(null);
+	const hudRightRef = useRef<SVGTextElement | null>(null);
+	const hudRightTextRef = useRef<string>(hudRightText);
+
+	useEffect(() => {
+		hudRightTextRef.current = hudRightText;
+	}, [hudRightText]);
 
 	const [seed] = useState(() => Math.floor(Math.random() * 1_000_000_000));
 	const rng = useMemo(() => mulberry32(seed), [seed]);
@@ -164,9 +171,10 @@ function DinoRunner({ ariaLabel, hudText }: { ariaLabel: string; hudText: string
 		}
 
 		function updateHud() {
-			const hud = hudRef.current;
-			if (!hud) return;
-			hud.textContent = `RUNNING • score ${score} • AI never loses`;
+			const left = hudLeftRef.current;
+			const right = hudRightRef.current;
+			if (left) left.textContent = "";
+			if (right) right.textContent = `${hudRightTextRef.current} • score ${score}`;
 		}
 
 		function setTheme(next: "day" | "night") {
@@ -194,7 +202,7 @@ function DinoRunner({ ariaLabel, hudText }: { ariaLabel: string; hudText: string
 			if (elapsedMs >= nextThemeFlip) {
 				theme = theme === "day" ? "night" : "day";
 				setTheme(theme);
-				nextThemeFlip = elapsedMs + 9000 + rng() * 9000;
+				nextThemeFlip = elapsedMs + 3000 + rng() * 6000;
 			}
 
 			// scenery
@@ -288,14 +296,12 @@ function DinoRunner({ ariaLabel, hudText }: { ariaLabel: string; hudText: string
 					h: o.h,
 				};
 				if (aabbIntersect(dinoBox.x, dinoBox.y, dinoBox.w, dinoBox.h, obBox.x, obBox.y, obBox.w, obBox.h)) {
-					// Guarantee "never lose": only apply a stronger jump if we're basically grounded
-					// (avoid mid-air "double jumps" that look buggy).
-					if (grounded && jumpCooldownMs === 0) {
-						const spec = runnerSpec(o.kind);
-						const desiredH = (spec.action === "jump" ? spec.jumpHeight : 80) + 28;
-						vy = Math.sqrt(2 * Math.abs(gravity) * desiredH);
-						jumpCooldownMs = 260;
-					}
+					// Hard guarantee: never allow a collision to persist.
+					// If we intersect, forcibly boost the dino above the obstacle.
+					const clearance = o.h + o.offsetY + 26;
+					y = Math.max(y, clearance);
+					vy = Math.max(vy, 0.45);
+					jumpCooldownMs = Math.max(jumpCooldownMs, 120);
 				}
 			}
 
@@ -440,14 +446,14 @@ function DinoRunner({ ariaLabel, hudText }: { ariaLabel: string; hudText: string
 			))}
 
 			{/* HUD */}
-			<text ref={hudRef} x={WIDTH - 320} y="22" className="hud">
-				{hudText}
-			</text>
+			<text ref={hudLeftRef} x={12} y="22" className="hud" textAnchor="start" />
+			<text ref={hudRightRef} x={WIDTH - 12} y="22" className="hud" textAnchor="end" />
 		</svg>
 	);
 }
 
-export function DinoLoader({ className, subtitle }: Props) {
+export function DinoLoader({ className, subtitle, tokens }: Props) {
+	const safeTokens = typeof tokens === "number" && Number.isFinite(tokens) && tokens >= 0 ? Math.floor(tokens) : 0;
 	return (
 		<div
 			className={["w-full rounded-2xl border border-white/[0.10] bg-white/[0.02] overflow-hidden", className]
@@ -455,7 +461,7 @@ export function DinoLoader({ className, subtitle }: Props) {
 			.join(" ")}
 		>
 			<div className="p-4">
-				<DinoRunner ariaLabel={subtitle} hudText={subtitle} />
+				<DinoRunner ariaLabel={subtitle} hudRightText={`tokens ${safeTokens}`} />
 				<div className="mt-3 text-sm text-zinc-300">{subtitle}</div>
 			</div>
 		</div>

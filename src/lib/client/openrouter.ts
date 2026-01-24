@@ -9,6 +9,9 @@ export type ClientChatMessage = {
 type StreamChatArgs = {
 	model: string;
 	messages: ClientChatMessage[];
+	conversationId?: string;
+	allowAutoContinue?: boolean;
+	continuation?: boolean;
 	personality?: {
 		tone: "professional" | "friendly" | "direct";
 		verbosity: "minimal" | "balanced" | "detailed";
@@ -20,6 +23,7 @@ type StreamChatArgs = {
 	statusMode?: "mcp" | "detailed";
 	signal?: AbortSignal;
 	onTextDelta: (delta: string) => void;
+	onMeta?: (meta: unknown) => void;
 };
 
 export async function streamChatCompletion(args: StreamChatArgs) {
@@ -27,6 +31,7 @@ export async function streamChatCompletion(args: StreamChatArgs) {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
+			...(args.conversationId ? { "x-conversation-id": args.conversationId } : null),
 			...(args.uiLanguage ? { "x-ui-language": args.uiLanguage } : null),
 			...(args.statusMode ? { "x-greg-status": args.statusMode } : null),
 		},
@@ -35,6 +40,8 @@ export async function streamChatCompletion(args: StreamChatArgs) {
 			messages: args.messages,
 			personality: args.personality,
 			customInstructions: args.customInstructions,
+			allowAutoContinue: args.allowAutoContinue,
+			continuation: args.continuation,
 		}),
 		signal: args.signal,
 	});
@@ -44,7 +51,7 @@ export async function streamChatCompletion(args: StreamChatArgs) {
 		throw new Error(text || "Chat request failed");
 	}
 
-	await consumeOpenAiSse(res, { onTextDelta: args.onTextDelta });
+	await consumeOpenAiSse(res, { onTextDelta: args.onTextDelta, onMeta: args.onMeta });
 }
 
 export type ModelListItem = {

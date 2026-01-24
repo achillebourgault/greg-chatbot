@@ -20,9 +20,9 @@ function parsePrice(value?: string): number | null {
 	return Number.isFinite(n) ? n : null;
 }
 
-function formatMoneyUsd(value: number): string {
-	if (!Number.isFinite(value)) return "$0";
-	if (value === 0) return "$0";
+function formatMoneyUsd(value: number, lang: UiLanguage): string {
+	if (!Number.isFinite(value)) return t(lang, "pricing.free");
+	if (value === 0) return t(lang, "pricing.free");
 	if (value < 0.01) return `$${value.toFixed(4)}`;
 	if (value < 1) return `$${value.toFixed(3)}`;
 	if (value < 10) return `$${value.toFixed(2)}`;
@@ -122,7 +122,7 @@ function buildLastNDaysSeries(rows: UsageRow[], days: number) {
 	return Array.from(buckets.entries()).map(([ts, v]) => ({ ts, v }));
 }
 
-function AnimatedLineChart({ series, label }: { series: { ts: number; v: number }[]; label: string }) {
+function AnimatedLineChart({ series, label, lang }: { series: { ts: number; v: number }[]; label: string; lang: UiLanguage }) {
 	const max = Math.max(0.000001, ...series.map((p) => p.v));
 	const min = Math.min(0, ...series.map((p) => p.v));
 	const w = 600;
@@ -146,7 +146,7 @@ function AnimatedLineChart({ series, label }: { series: { ts: number; v: number 
 		<div className="rounded-xl bg-white/[0.02] border border-white/[0.06] p-4">
 			<div className="flex items-center justify-between gap-3">
 				<div className="text-sm font-semibold text-zinc-100">{label}</div>
-				<div className="text-[11px] text-zinc-500">{formatMoneyUsd(series.reduce((a, b) => a + b.v, 0))}</div>
+				<div className="text-[11px] text-zinc-500">{formatMoneyUsd(series.reduce((a, b) => a + b.v, 0), lang)}</div>
 			</div>
 			<div className="mt-3 overflow-hidden rounded-lg bg-zinc-950/40 border border-white/[0.06]">
 				<svg viewBox={`0 0 ${w} ${h}`} className="w-full h-[160px]">
@@ -187,7 +187,7 @@ function AnimatedLineChart({ series, label }: { series: { ts: number; v: number 
 							strokeWidth="1"
 							opacity={Math.min(1, progress * 1.2)}
 						>
-							<title>{`${new Date(p.ts).toLocaleDateString(undefined, { month: "short", day: "2-digit" })}: ${formatMoneyUsd(p.v)}`}</title>
+							<title>{`${new Date(p.ts).toLocaleDateString(undefined, { month: "short", day: "2-digit" })}: ${formatMoneyUsd(p.v, lang)}`}</title>
 						</circle>
 					))}
 				</svg>
@@ -461,7 +461,7 @@ export default function UsagesRoute() {
 					</div>
 
 					<div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-						{statCard(t(lang, "analytics.estimatedCost.filtered"), formatMoneyUsd(filteredTotals.totalCost), t(lang, "analytics.estimatedCost.hint"))}
+						{statCard(t(lang, "analytics.estimatedCost.filtered"), formatMoneyUsd(filteredTotals.totalCost, lang), t(lang, "analytics.estimatedCost.hint"))}
 						{statCard(
 							t(lang, "analytics.calls.filtered"),
 							formatInt(filteredTotals.calls, lang),
@@ -476,7 +476,7 @@ export default function UsagesRoute() {
 
 					<div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-4">
 						<div className="lg:col-span-2">
-							<AnimatedLineChart series={series} label={t(lang, "analytics.estimatedSpend")} />
+							<AnimatedLineChart series={series} label={t(lang, "analytics.estimatedSpend")} lang={lang} />
 						</div>
 						<div className="rounded-xl bg-white/[0.02] border border-white/[0.06] p-4">
 							<div className="text-sm font-semibold text-zinc-100">{t(lang, "analytics.topModels")}</div>
@@ -491,7 +491,7 @@ export default function UsagesRoute() {
 												<div className="text-sm text-zinc-200 truncate">{getModelDisplayName(m.modelId)}</div>
 												<div className="text-[11px] text-zinc-500 truncate">{m.modelId}</div>
 											</div>
-											<div className="text-sm text-zinc-200 flex-shrink-0">{formatMoneyUsd(m.costUsd)}</div>
+											<div className="text-sm text-zinc-200 flex-shrink-0">{formatMoneyUsd(m.costUsd, lang)}</div>
 										</div>
 									))
 								)}
@@ -532,7 +532,7 @@ export default function UsagesRoute() {
 												<td className="px-5 py-3 text-right text-zinc-200">{formatInt(m.calls, lang)}</td>
 												<td className="px-5 py-3 text-right text-zinc-200">{formatInt(m.inTokens, lang)}</td>
 												<td className="px-5 py-3 text-right text-zinc-200">{formatInt(m.outTokens, lang)}</td>
-												<td className="px-5 py-3 text-right text-zinc-200">{formatMoneyUsd(m.costUsd)}</td>
+													<td className="px-5 py-3 text-right text-zinc-200">{formatMoneyUsd(m.costUsd, lang)}</td>
 											</tr>
 										))
 									)}
@@ -579,17 +579,16 @@ export default function UsagesRoute() {
 										</tr>
 									) : (
 										pagedRecent.items.map((r) => (
-											<tr key={r.id} className="hover:bg-white/[0.02]">
+											<tr key={`${r.conversationId}:${r.id}`} className="hover:bg-white/[0.02]">
 												<td className="px-5 py-3 text-zinc-300 whitespace-nowrap">{formatDateTime(r.createdAt, lang)}</td>
 												<td className="px-5 py-3 min-w-[220px]">
 													<div className="text-zinc-200 truncate">{r.conversationTitle}</div>
-													<div className="text-[11px] text-zinc-500 truncate">{r.promptPreview || t(lang, "analytics.noPrompt")}</div>
 												</td>
 												<td className="px-5 py-3">
 													<div className="text-zinc-200 truncate">{getModelDisplayName(r.modelId)}</div>
 													<div className="text-[11px] text-zinc-500 truncate">{r.modelId}</div>
 												</td>
-												<td className="px-5 py-3 text-right text-zinc-200 whitespace-nowrap">{formatMoneyUsd(r.costUsd)}</td>
+													<td className="px-5 py-3 text-right text-zinc-200 whitespace-nowrap">{formatMoneyUsd(r.costUsd, lang)}</td>
 												<td className="px-5 py-3 text-right text-zinc-200 whitespace-nowrap">
 													{formatInt(r.inTokens + r.outTokens, lang)}
 													<div className="text-[11px] text-zinc-500">{formatInt(r.inTokens, lang)} in • {formatInt(r.outTokens, lang)} out</div>

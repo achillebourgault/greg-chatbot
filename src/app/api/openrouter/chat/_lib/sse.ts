@@ -39,6 +39,12 @@ export function createSseStream(req: Request) {
 		await writer.write(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`));
 	};
 
+	const writeMeta = async (meta: unknown) => {
+		// Non-OpenAI metadata event (client understands `greg`).
+		const payload = { greg: meta };
+		await writer.write(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`));
+	};
+
 	const writeDone = async () => {
 		await writer.write(encoder.encode("data: [DONE]\n\n"));
 	};
@@ -64,6 +70,7 @@ export function createSseStream(req: Request) {
 		readable,
 		writer,
 		writeDelta,
+		writeMeta,
 		writeDone,
 		writeStatus,
 		closeWriterSafe,

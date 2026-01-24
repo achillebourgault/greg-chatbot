@@ -1,6 +1,12 @@
 import { JSDOM } from "jsdom";
 import { Readability } from "@mozilla/readability";
 
+function stripStylesheets(html) {
+	return String(html ?? "")
+		.replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, "")
+		.replace(/<link\b[^>]*rel=["']stylesheet["'][^>]*>/gi, "");
+}
+
 function normalizeInputUrl(input) {
 	const raw = String(input ?? "").trim();
 	if (!raw) throw new Error("Empty URL");
@@ -19,6 +25,60 @@ function normalizeInputUrl(input) {
 function truncateText(text, maxChars) {
 	if (!maxChars || text.length <= maxChars) return text;
 	return text.slice(0, Math.max(0, maxChars - 1)).trimEnd() + "…";
+}
+
+async function fetchTextProxy({ url, normalizedUrl, reason, maxChars, timeoutMs }) {
+	const controller = new AbortController();
+	const timer = setTimeout(() => controller.abort(), Math.min(Number(timeoutMs) || 20000, 15000));
+	try {
+		const proxyUrl = `https://r.jina.ai/${normalizedUrl}`;
+		const fetchedAt = new Date().toISOString();
+		const res = await fetch(proxyUrl, {
+			signal: controller.signal,
+			headers: {
+				Accept: "text/plain,*/*;q=0.8",
+				"User-Agent": "GregMCP/0.1 (+https://www.achillebourgault.com)",
+				"Accept-Language": "en,fr;q=0.9,*;q=0.8",
+			},
+		});
+		if (!res.ok) return null;
+		const text = await res.text();
+		const t = truncateText(String(text ?? "").trim(), maxChars);
+		return {
+			url,
+			normalizedUrl,
+			kind: "generic",
+			status: res.status,
+			contentType: (res.headers.get("content-type") ?? "text/plain") + " (via r.jina.ai)",
+			fetchedAt,
+			error: `Used text proxy (${reason})`,
+			meta: {
+				title: null,
+				description: null,
+				canonical: null,
+				ogTitle: null,
+				ogDescription: null,
+				ogImage: null,
+			},
+			content: {
+				text: t,
+				excerpt: null,
+				byline: null,
+				siteName: null,
+				length: typeof t === "string" ? t.length : null,
+				headings: [],
+				links: [],
+			},
+			raw: {
+				bytes: Buffer.byteLength(text ?? "", "utf8"),
+				truncated: (String(text ?? "").trim().length ?? 0) > (Number(maxChars) || 0),
+			},
+		};
+	} catch {
+		return null;
+	} finally {
+		clearTimeout(timer);
+	}
 }
 
 function absoluteUrl(baseUrl, href) {
@@ -42,7 +102,8 @@ function pickMeta(document, { name, property }) {
 }
 
 export async function analyzeUrl(url, opts = {}) {
-	const normalizedUrl = normalizeInputUrl(url);
+	let normalizedUrl = normalizeInputUrl(url);
+	let effectiveUrl = normalizedUrl;
 	const maxChars = typeof opts.maxChars === "number" ? opts.maxChars : 20000;
 	const timeoutMs = typeof opts.timeoutMs === "number" ? opts.timeoutMs : 20000;
 	const maxLinks = typeof opts.maxLinks === "number" ? opts.maxLinks : 60;
@@ -53,14 +114,38 @@ export async function analyzeUrl(url, opts = {}) {
 	let res;
 	let html;
 	try {
-		res = await fetch(normalizedUrl, {
-			signal: controller.signal,
-			headers: {
-				"User-Agent": "GregMCP/0.1 (+https://www.achillebourgault.com)",
-				"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-				"Accept-Language": "en,fr;q=0.9,*;q=0.8",
-			},
-		});
+		try {
+			res = await fetch(effectiveUrl, {
+				signal: controller.signal,
+				headers: {
+					"User-Agent": "GregMCP/0.1 (+https://www.achillebourgault.com)",
+					"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+					"Accept-Language": "en,fr;q=0.9,*;q=0.8",
+				},
+			});
+		} catch (e) {
+			const code = e?.cause?.code;
+			if (code === "ERR_TLS_CERT_ALTNAME_INVALID") {
+				const u = new URL(effectiveUrl);
+				if (!u.hostname.startsWith("www.")) {
+					u.hostname = `www.${u.hostname}`;
+					effectiveUrl = u.toString();
+					res = await fetch(effectiveUrl, {
+						signal: controller.signal,
+						headers: {
+							"User-Agent": "GregMCP/0.1 (+https://www.achillebourgault.com)",
+							"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+							"Accept-Language": "en,fr;q=0.9,*;q=0.8",
+						},
+					});
+					normalizedUrl = effectiveUrl;
+				} else {
+					throw e;
+				}
+			} else {
+				throw e;
+			}
+		}
 		html = await res.text();
 	} finally {
 		clearTimeout(timer);
@@ -68,6 +153,12 @@ export async function analyzeUrl(url, opts = {}) {
 
 	const contentType = res.headers.get("content-type") ?? "";
 	const status = res.status;
+
+	// If the direct fetch failed/was blocked, try a text proxy fallback.
+	if (!html || status === 0 || status === 403 || status === 429 || status >= 500) {
+		const fallback = await fetchTextProxy({ url, normalizedUrl: effectiveUrl, reason: `HTTP ${status || 0}`, maxChars, timeoutMs });
+		if (fallback) return fallback;
+	}
 
 	const out = {
 		url,
@@ -100,12 +191,29 @@ export async function analyzeUrl(url, opts = {}) {
 
 	// Non-HTML content: keep it minimal and safe.
 	if (!contentType.toLowerCase().includes("text/html")) {
+		const fallback = await fetchTextProxy({ url, normalizedUrl: effectiveUrl, reason: `non-HTML content-type: ${contentType || "unknown"}`, maxChars, timeoutMs });
+		if (fallback) return fallback;
 		out.content.text = truncateText(html, maxChars);
 		out.raw.truncated = (html?.length ?? 0) > maxChars;
 		return out;
 	}
 
-	const dom = new JSDOM(html, { url: normalizedUrl });
+	let dom;
+	try {
+		dom = new JSDOM(stripStylesheets(html), { url: normalizedUrl });
+	} catch (e) {
+		// Avoid crashing on invalid CSS; return a minimal safe output.
+		out.content.text = truncateText(String(html ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(), maxChars);
+		out.raw.truncated = (out.content.text?.length ?? 0) >= maxChars;
+		out.meta.title = null;
+		out.meta.description = null;
+		out.meta.canonical = null;
+		out.meta.ogTitle = null;
+		out.meta.ogDescription = null;
+		out.meta.ogImage = null;
+		out.error = e instanceof Error ? e.message : "Failed to parse HTML";
+		return out;
+	}
 	const document = dom.window.document;
 
 	out.meta.title = document.querySelector("title")?.textContent?.trim() ?? null;
@@ -146,6 +254,16 @@ export async function analyzeUrl(url, opts = {}) {
 		out.content.siteName = article.siteName ?? null;
 		out.content.length = typeof article.length === "number" ? article.length : null;
 		out.content.text = truncateText(article.textContent?.trim() ?? "", maxChars);
+		// If Readability yields almost no text (common on JS-heavy sites), try the text proxy anyway.
+		if (typeof out.content.text === "string" && out.content.text.trim().length > 0 && out.content.text.trim().length < 240) {
+			const fallback = await fetchTextProxy({ url, normalizedUrl: effectiveUrl, reason: "low extracted text", maxChars, timeoutMs });
+			if (fallback && typeof fallback.content.text === "string") {
+				const aLen = out.content.text.trim().length;
+				const fLen = fallback.content.text.trim().length;
+				const threshold = aLen < 80 ? 160 : Math.max(600, aLen * 3);
+				if (fLen >= threshold) return fallback;
+			}
+		}
 	} else {
 		// Fallback: basic visible text
 		const text = (document.body?.textContent ?? "").replace(/\s+/g, " ").trim();

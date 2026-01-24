@@ -1,6 +1,9 @@
+import type { SourceKind } from "@/lib/sources/types";
+
 export type UrlAnalysis = {
 	url: string;
 	normalizedUrl: string;
+	kind: SourceKind;
 	status: number;
 	contentType: string;
 	fetchedAt: string;
@@ -12,6 +15,13 @@ export type UrlAnalysis = {
 		ogTitle: string | null;
 		ogDescription: string | null;
 		ogImage: string | null;
+		ogType: string | null;
+		twitterCard: string | null;
+		author: string | null;
+		publishedTime: string | null;
+		modifiedTime: string | null;
+		structuredTypes: string[];
+		structuredHeadline: string | null;
 	};
 	content: {
 		text: string | null;

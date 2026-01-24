@@ -58,7 +58,8 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 			},
 			setMessageContent: (conversationId, messageId, content) =>
 				dispatch({ type: "setMessageContent", conversationId, messageId, content }),
-			setStreaming: (value) => dispatch({ type: "setStreaming", value }),
+			setStreaming: (value, conversationId) => dispatch({ type: "setStreaming", value, conversationId }),
+			setModelPricing: (pricing) => dispatch({ type: "setModelPricing", pricing }),
 			updateSettings: (settings: Partial<GregSettings>) => dispatch({ type: "updateSettings", settings }),
 			toggleSidebar: () => dispatch({ type: "toggleSidebar" }),
 			setSidebarOpen: (open) => dispatch({ type: "setSidebarOpen", open }),

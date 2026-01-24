@@ -47,7 +47,9 @@ export type ChatState = {
 	activeId: string;
 	conversations: Conversation[];
 	isStreaming: boolean;
+	streamingConversationId: string | null;
 	modelStats: ModelStats;
+	modelPricing: Record<string, { isFree: boolean }>;
 	settings: GregSettings;
 	sidebarOpen: boolean;
 	composerPrefill: { conversationId: string; text: string; nonce: number } | null;
@@ -68,7 +70,8 @@ export type Action =
 	| { type: "setModel"; id: string; model: string }
 	| { type: "appendMessage"; id: string; message: ChatMessage }
 	| { type: "setMessageContent"; conversationId: string; messageId: string; content: string }
-	| { type: "setStreaming"; value: boolean }
+	| { type: "setStreaming"; value: boolean; conversationId?: string | null }
+	| { type: "setModelPricing"; pricing: Record<string, { isFree: boolean }> }
 	| { type: "updateSettings"; settings: Partial<GregSettings> }
 	| { type: "toggleSidebar" }
 	| { type: "setSidebarOpen"; open: boolean };
@@ -89,7 +92,8 @@ export type ChatStore = {
 	setModel: (id: string, model: string) => void;
 	appendMessage: (conversationId: string, role: ChatRole, content: string, model?: string) => string;
 	setMessageContent: (conversationId: string, messageId: string, content: string) => void;
-	setStreaming: (value: boolean) => void;
+	setStreaming: (value: boolean, conversationId?: string | null) => void;
+	setModelPricing: (pricing: Record<string, { isFree: boolean }>) => void;
 	updateSettings: (settings: Partial<GregSettings>) => void;
 	toggleSidebar: () => void;
 	setSidebarOpen: (open: boolean) => void;

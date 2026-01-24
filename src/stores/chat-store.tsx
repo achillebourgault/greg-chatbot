@@ -16,5 +16,5 @@ export type {
 	ModelStats,
 } from "./chat/types";
 
-export { DEFAULT_MODEL, extractSuggestedTitle, getModelDisplayName } from "./chat/helpers";
+export { DEFAULT_MODEL, extractSuggestedTitle, getModelDisplayName, isPlaceholderConversationTitle } from "./chat/helpers";
 export { ChatProvider, useChatStore } from "./chat/provider";

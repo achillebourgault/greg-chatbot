@@ -35,6 +35,9 @@ yarn-error.log*
 # local tooling
 .senior*
 
+# local logs
+.greg-logs
+
 # temp artifacts
 .tmp-build.txt
 

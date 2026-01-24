@@ -59,7 +59,7 @@ function groupModels(models: ModelListItem[]): Map<string, ModelListItem[]> {
 }
 
 export function ModelPicker({ value, onChange, disabled, placement = "up", lang = "en" }: Props) {
-	const { state } = useChatStore();
+	const { state, setModelPricing } = useChatStore();
 	const [models, setModels] = useState<ModelListItem[] | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [isOpen, setIsOpen] = useState(false);
@@ -73,13 +73,16 @@ export function ModelPicker({ value, onChange, disabled, placement = "up", lang 
 			.then((items) => {
 				setModels(items);
 				setError(null);
+				const pricing: Record<string, { isFree: boolean }> = {};
+				for (const m of items) pricing[m.id] = { isFree: isFreeModel(m) };
+				setModelPricing(pricing);
 			})
 			.catch((e) => {
-				setError(e instanceof Error ? e.message : "Failed to load models");
+				setError(e instanceof Error ? e.message : t(lang, "errors.modelsLoadFailed"));
 				setModels([]);
 			});
 		return () => controller.abort();
-	}, []);
+	}, [lang, setModelPricing]);
 
 	useEffect(() => {
 		const handleClickOutside = (e: MouseEvent) => {

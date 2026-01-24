@@ -1,4 +1,5 @@
 import type { UrlAnalysis } from "./types";
+import { rankLikelyItemLinks } from "./linkRank";
 
 export function formatUrlAnalysisForPrompt(a: UrlAnalysis): string {
 	const title = a.meta.ogTitle ?? a.meta.title;
@@ -12,6 +13,11 @@ export function formatUrlAnalysisForPrompt(a: UrlAnalysis): string {
 	if (a.error) lines.push(`Fetch note: ${a.error}`);
 	if (title) lines.push(`Title: ${title}`);
 	if (desc) lines.push(`Description: ${desc}`);
+	if (a.meta.structuredHeadline && a.meta.structuredHeadline !== title) lines.push(`Structured headline: ${a.meta.structuredHeadline}`);
+	if (a.meta.author) lines.push(`Author: ${a.meta.author}`);
+	if (a.meta.publishedTime) lines.push(`Published: ${a.meta.publishedTime}`);
+	if (a.meta.modifiedTime) lines.push(`Modified: ${a.meta.modifiedTime}`);
+	if (a.meta.structuredTypes?.length) lines.push(`Structured types: ${a.meta.structuredTypes.slice(0, 8).join(", ")}`);
 	if (a.content.siteName) lines.push(`Site: ${a.content.siteName}`);
 	if (a.content.byline) lines.push(`Byline: ${a.content.byline}`);
 	if (typeof a.content.length === "number") lines.push(`Extracted length: ${a.content.length}`);
@@ -25,10 +31,26 @@ export function formatUrlAnalysisForPrompt(a: UrlAnalysis): string {
 		lines.push(a.content.text);
 	}
 	if (a.content.links.length) {
-		lines.push("Links (sample):");
-		for (const l of a.content.links.slice(0, 20)) {
+		const likely = rankLikelyItemLinks(a.normalizedUrl || a.url, a.content.links, 24);
+		if (likely.length) {
+			lines.push("Likely item links (ranked, extracted):");
+			for (const l of likely) {
+				const label = l.text ? `${l.text} — ` : "";
+				lines.push(`- ${label}${l.url}`);
+			}
+		}
+
+		const maxLinkLines = 60;
+		lines.push(`Links (sample, up to ${maxLinkLines}; extracted ${a.content.links.length}):`);
+		const seen = new Set<string>();
+		for (const l of a.content.links) {
+			const url = (l.url ?? "").trim();
+			if (!url) continue;
+			if (seen.has(url)) continue;
+			seen.add(url);
 			const label = l.text ? `${l.text} — ` : "";
-			lines.push(`- ${label}${l.url}`);
+			lines.push(`- ${label}${url}`);
+			if (seen.size >= maxLinkLines) break;
 		}
 	}
 	return lines.join("\n");

@@ -8,6 +8,8 @@ export type ChatRequestBody = {
 	personality?: GregPersonality;
 	temperature?: number;
 	max_tokens?: number;
+	allowAutoContinue?: boolean;
+	continuation?: boolean;
 };
 
 function isChatMessageInput(value: unknown): value is ChatMessageInput {

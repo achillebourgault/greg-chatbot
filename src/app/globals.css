@@ -132,17 +132,41 @@ body {
 
 /* Focus visible */
 :focus-visible {
-  outline: 2px solid rgba(255, 255, 255, 0.2);
+  outline: 2px solid rgba(16, 185, 129, 0.35);
   outline-offset: 2px;
+}
+
+/* Composer: we style focus on the container instead of the textarea outline */
+.composer-textarea:focus-visible {
+  outline: none;
 }
 
 /* Markdown rendering (chat) */
 .greg-markdown {
   white-space: normal;
+  line-height: 1.55;
 }
 
 .greg-markdown p {
   margin: 0.4rem 0;
+}
+
+.greg-md-hr {
+  border: 0;
+  height: 1px;
+  margin: 0.75rem 0;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.12),
+    transparent
+  );
+  opacity: 0.8;
+}
+
+.greg-md-del {
+  text-decoration-thickness: 1px;
+  text-decoration-color: rgba(255, 255, 255, 0.35);
 }
 
 .greg-md-link {
@@ -185,6 +209,10 @@ body {
   padding-left: 1.2rem;
 }
 
+.greg-markdown li {
+  margin: 0.15rem 0;
+}
+
 .greg-md-quote {
   margin: 0.6rem 0;
   padding: 0.5rem 0.75rem;
@@ -192,4 +220,19 @@ body {
   background: rgba(255, 255, 255, 0.03);
   border-radius: 0.6rem;
   color: rgba(228, 228, 231, 0.9);
+}
+
+.greg-md-img-wrap {
+  margin: 0.6rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.greg-md-img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
 }

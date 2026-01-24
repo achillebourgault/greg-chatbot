@@ -4,9 +4,11 @@ import {
 	bumpModelStats,
 	defaultModelStats,
 	defaultSettings,
+	normalizeConversationTitle,
 	now,
 	newFallbackConversation,
 	newId,
+	sanitizeAssistantContent,
 } from "./helpers";
 import type { Action, ChatState, Conversation } from "./types";
 
@@ -18,7 +20,9 @@ export function initialState(): ChatState {
 		activeId: fallback.id,
 		conversations: [fallback],
 		isStreaming: false,
+		streamingConversationId: null,
 		modelStats: defaultModelStats(),
+		modelPricing: {},
 		settings,
 		sidebarOpen: true,
 		composerPrefill: null,
@@ -103,11 +107,12 @@ export function reducer(state: ChatState, action: Action): ChatState {
 			while (baseTitle.endsWith(suffix)) baseTitle = baseTitle.slice(0, -suffix.length).trimEnd();
 			const nextTitle = `${baseTitle}${suffix}`.slice(0, 120);
 
+			const clonedMessages = source.messages.slice(0, idx + 1).map((m) => ({ ...m, id: newId() }));
 			const conversation: Conversation = {
 				id: newId(),
 				title: nextTitle,
 				model: source.model,
-				messages: source.messages.slice(0, idx + 1),
+				messages: clonedMessages,
 				createdAt: ts,
 				updatedAt: ts,
 			};
@@ -134,11 +139,12 @@ export function reducer(state: ChatState, action: Action): ChatState {
 			while (baseTitle.endsWith(suffix)) baseTitle = baseTitle.slice(0, -suffix.length).trimEnd();
 			const nextTitle = `${baseTitle}${suffix}`.slice(0, 120);
 
+			const clonedMessages = source.messages.slice(0, idx).map((m) => ({ ...m, id: newId() }));
 			const conversation: Conversation = {
 				id: newId(),
 				title: nextTitle,
 				model: source.model,
-				messages: source.messages.slice(0, idx),
+				messages: clonedMessages,
 				createdAt: ts,
 				updatedAt: ts,
 			};
@@ -158,12 +164,16 @@ export function reducer(state: ChatState, action: Action): ChatState {
 			return { ...state, composerPrefill: null };
 		}
 		case "rename":
+			{
+				const normalized = normalizeConversationTitle(action.title);
+				if (!normalized) return state;
 			return {
 				...state,
 				conversations: state.conversations.map((c) =>
-					c.id === action.id ? { ...c, title: action.title, updatedAt: now() } : c,
+					c.id === action.id ? { ...c, title: normalized, updatedAt: now() } : c,
 				),
 			};
+			}
 		case "setModel":
 			return {
 				...state,
@@ -196,14 +206,28 @@ export function reducer(state: ChatState, action: Action): ChatState {
 					return {
 						...c,
 						messages: c.messages.map((m) =>
-							m.id === action.messageId ? { ...m, content: action.content } : m,
+							m.id === action.messageId
+								? {
+									...m,
+									content: m.role === "assistant" ? sanitizeAssistantContent(action.content) : action.content,
+								}
+								: m,
 						),
 						updatedAt: now(),
 					};
 				}),
 			};
 		case "setStreaming":
-			return { ...state, isStreaming: action.value };
+			return {
+				...state,
+				isStreaming: action.value,
+				streamingConversationId: action.value
+					? (typeof action.conversationId === "string" ? action.conversationId : (state.streamingConversationId ?? state.activeId))
+					: null,
+			};
+		case "setModelPricing": {
+			return { ...state, modelPricing: { ...state.modelPricing, ...action.pricing } };
+		}
 		case "updateSettings":
 			return { ...state, settings: { ...state.settings, ...action.settings } };
 		case "toggleSidebar":

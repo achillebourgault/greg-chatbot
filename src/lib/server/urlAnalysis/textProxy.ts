@@ -28,6 +28,7 @@ export async function fetchTextProxy(args: {
 		return {
 			url: args.url,
 			normalizedUrl: args.normalizedUrl,
+			kind: "generic",
 			status: res.status,
 			contentType: (res.headers.get("content-type") ?? "text/plain") + " (via r.jina.ai)",
 			fetchedAt,
@@ -39,6 +40,13 @@ export async function fetchTextProxy(args: {
 				ogTitle: null,
 				ogDescription: null,
 				ogImage: null,
+				ogType: null,
+				twitterCard: null,
+				author: null,
+				publishedTime: null,
+				modifiedTime: null,
+				structuredTypes: [],
+				structuredHeadline: null,
 			},
 			content: {
 				text: t.text,

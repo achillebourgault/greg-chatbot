@@ -1,5 +1,5 @@
 import { DEFAULT_UI_LANGUAGE } from "@/i18n";
-import { DEFAULT_MODEL, defaultModelStats, defaultSettings, newId, normalizeUiLanguage } from "./helpers";
+import { DEFAULT_MODEL, defaultModelStats, defaultSettings, newId, normalizeUiLanguage, sanitizeAssistantContent } from "./helpers";
 import type { ChatState } from "./types";
 
 type NormalizedMessage = {
@@ -71,7 +71,8 @@ function normalizeConversations(value: unknown): NormalizedConversation[] {
 			const role: NormalizedMessage["role"] =
 				rawRole === "system" || rawRole === "user" || rawRole === "assistant" ? rawRole : "user";
 			const rawContent = m["content"];
-			const content = typeof rawContent === "string" ? rawContent : "";
+			let content = typeof rawContent === "string" ? rawContent : "";
+			if (role === "assistant") content = sanitizeAssistantContent(content);
 			const rawModelForMessage = m["model"];
 			const modelForMessage =
 				typeof rawModelForMessage === "string" && rawModelForMessage.trim().length > 0
@@ -128,6 +129,21 @@ export function safeParseState(raw: string): ChatState | null {
 				.slice(0, 24);
 		}
 
+		const modelPricing = json["modelPricing"];
+		if (!isPlainObject(modelPricing)) {
+			json["modelPricing"] = {};
+		} else {
+			const next: Record<string, { isFree: boolean }> = {};
+			for (const [k, v] of Object.entries(modelPricing)) {
+				if (typeof k !== "string" || !k.trim()) continue;
+				if (!isPlainObject(v)) continue;
+				const isFree = v["isFree"];
+				if (typeof isFree !== "boolean") continue;
+				next[k] = { isFree };
+			}
+			json["modelPricing"] = next;
+		}
+
 		const settings = json["settings"];
 		if (!isPlainObject(settings)) {
 			json["settings"] = defaultSettings();
@@ -152,6 +168,12 @@ export function safeParseState(raw: string): ChatState | null {
 
 		if (json["sidebarOpen"] === undefined) {
 			json["sidebarOpen"] = true;
+		}
+		if (json["isStreaming"] === undefined) {
+			json["isStreaming"] = false;
+		}
+		if (json["streamingConversationId"] === undefined) {
+			json["streamingConversationId"] = null;
 		}
 		if (json["composerPrefill"] === undefined) {
 			json["composerPrefill"] = null;

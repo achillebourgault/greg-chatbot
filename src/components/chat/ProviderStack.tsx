@@ -103,11 +103,12 @@ export function ProviderStack({ conversation }: { conversation: Conversation }) 
 			const providerId = providerFromModelId(modelId);
 			const info = getProviderInfo(providerId);
 			const iconUrl = `/api/tools/icon?url=${encodeURIComponent(info.siteUrl)}`;
+			const providerLabel = providerId === "unknown" ? t(lang, "providers.unknown") : info.label;
 
 			const existing = perModel.get(modelId) ?? {
 				modelId,
 				label: getModelDisplayName(modelId),
-				providerLabel: info.label,
+				providerLabel,
 				iconUrl,
 				fallbackIconSrc: info.iconSrc,
 				totalUsd: 0,
@@ -149,7 +150,7 @@ export function ProviderStack({ conversation }: { conversation: Conversation }) 
 		}
 
 		return Array.from(perModel.values()).sort((a, b) => b.totalUsd - a.totalUsd);
-	}, [conversation.messages, conversation.model, pricingMap]);
+	}, [conversation.messages, conversation.model, lang, pricingMap]);
 
 	const modelIcons = usage.map((u) => ({
 		label: u.label,

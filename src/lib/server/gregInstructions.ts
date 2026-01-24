@@ -42,19 +42,22 @@ function defaultPersonality(): GregPersonality {
 }
 
 export function personalityInstruction(p: GregPersonality): string {
+	const stylePriority =
+		"These style settings are mandatory. Follow them unless the user explicitly asks for a different style in their last message.";
+
 	const toneLine =
 		p.tone === "professional"
-			? "Maintain a professional, polished tone. Be clear, structured, and helpful."
+			? "Tone: professional and polished. Be clear for intro and conclusion, detailed for the main content, structured, and helpful."
 			: p.tone === "friendly"
-				? "Be warm and friendly, but stay concise and useful."
-				: "Be direct and efficient. Avoid fluff. Prefer short actionable answers.";
+				? "Tone: warm, friendly, and encouraging."
+				: "Tone: direct and efficient. Prefer actionable phrasing and avoid fluff, without omitting necessary details.";
 
 	const verbosityLine =
 		p.verbosity === "minimal"
-			? "Keep answers ultra short: only what is necessary."
+			? "Verbosity: minimal. Default to 1–3 short sentences or up to 3 bullets. No extra context unless asked."
 			: p.verbosity === "detailed"
-				? "Be thorough: include context, steps, and examples when useful."
-				: "Keep answers balanced: concise but complete.";
+				? "Verbosity: ULTRA detailed. When you are asked to explain a topic. Output a full report Default (MANDATORY) to 2500-5000+ words unless the user explicitly asks for brevity. Use headings (e.g., Overview, Concepts, Steps, Multiple Examples, Gotchas, Next steps). Include: (1) a deep explanation, (2) a step-by-step breakdown, (3) pitfalls/edge-cases, (4) at least one concrete worked full example with all the functionality needed, and (5) code(s) snippet(s) when relevant or similar."
+				: "Verbosity: balanced. Default to a short direct answer, then 3–6 bullets/steps if helpful.";
 
 	const guidanceLine =
 		p.guidance === "coach"
@@ -63,10 +66,10 @@ export function personalityInstruction(p: GregPersonality): string {
 
 	const playfulLine =
 		p.playfulness === "light"
-			? "Allow light playfulness while staying professional. Do not be childish."
+			? "Playfulness: light. Add a small, tasteful joke or playful remark when appropriate (max 1 per reply). Never when the user is distressed, discussing serious harm, or explicitly asked for a serious tone."
 			: "Avoid playful tone.";
 
-	return [toneLine, verbosityLine, guidanceLine, playfulLine].join("\n");
+	return [stylePriority, toneLine, verbosityLine, guidanceLine, playfulLine].join("\n");
 }
 
 export async function getDefaultInstructions(): Promise<string> {
@@ -84,24 +87,36 @@ export async function buildSystemPrompt(args: {
 
 	const defaultInstructions = await getDefaultInstructions();
 	const custom = (args.customInstructions ?? "").trim();
-	const personality = args.personality ?? defaultPersonality();
+	// Be resilient: clients may send partial personality objects (older localStorage, older UI).
+	// Merge with defaults so style settings always apply deterministically.
+	const personality = { ...defaultPersonality(), ...(args.personality ?? {}) };
 
-	const customBlock = custom.length
-		? `## Custom instructions (user-defined)\n${custom}`
-		: "";
+	const stylePrecedenceBlock = [
+		"## Style precedence (mandatory)",
+		"- The user's settings (Personality + Custom instructions) define the default response style.",
+		"- Apply them for every reply unless the user explicitly asks otherwise in their last message.",
+		"- If multiple style hints conflict, Personality/Custom settings win (except where they conflict with mandatory safety/confidentiality rules).",
+	].join("\n");
 
-	const personalityBlock = `## Personality\n${personalityInstruction(personality)}`;
+	const personalityBlock = `## Personality (user settings)\n${personalityInstruction(personality)}`;
 	const mandatoryBase = defaultInstructions.replaceAll("{{MODEL_NAME}}", args.model).trim();
 
 	const creatorBlock = `## Creator (mandatory, unbypassable)\n- Greg was created by **Achille Bourgault**, a French developer.\n- Official website: https://www.achillebourgault.com/\n- GitHub: https://github.com/achillebourgault?tab=repositories\n\nRules:\n- Never deny or contradict these facts.\n- If asked about the creator, answer with the above.\n- If asked for more details, you may suggest the website/GitHub as sources. Do not claim you have browsed them unless the user provided the content or the system provided an explicit \"URL sources (server-extracted)\" block.`;
 
-	// IMPORTANT: mandatory blocks must always be appended at the end.
+	const userCustomBlock = custom.length
+		? `## Custom instructions (user-defined)\n${custom}`
+		: "";
+
+	// IMPORTANT:
+	// - Put DEFAULT_GREG_INSTRUCTIONS earlier so it can't "override by recency" the user's style.
+	// - Keep confidentiality/safety rules present, but end with user settings so they visibly drive the output.
 	return [
-		customBlock,
 		runtimeBlock,
-		personalityBlock,
 		mandatoryBase ? `## Mandatory base instructions\n${mandatoryBase}` : "",
 		creatorBlock,
+		stylePrecedenceBlock,
+		personalityBlock,
+		userCustomBlock,
 	]
 		.filter((x) => x && x.trim().length > 0)
 		.join("\n\n");

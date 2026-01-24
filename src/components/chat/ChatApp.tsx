@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Sidebar, ChatThread, Composer, ProviderStack } from "@/components/chat";
+import { HtmlLangSync } from "@/components/chat/HtmlLangSync";
 import { Button, Icons } from "@/components/ui";
 import { streamChatCompletion } from "@/lib/client/openrouter";
 import { conversationToMarkdown, copyTextToClipboard } from "@/lib/client/chatExport";
@@ -10,7 +11,7 @@ import { t } from "@/i18n";
 import { 
 	ChatProvider, 
 	useChatStore, 
-	extractSuggestedTitle 
+	extractSuggestedTitle,
 } from "@/stores/chat-store";
 
 function ChatAppInner() {
@@ -74,7 +75,7 @@ function ChatAppInner() {
 	const onStop = useCallback(() => {
 		controllerRef.current?.abort();
 		controllerRef.current = null;
-		setStreaming(false);
+		setStreaming(false, null);
 	}, [setStreaming]);
 
 	const onExportConversation = useCallback(async () => {
@@ -94,15 +95,9 @@ function ChatAppInner() {
 
 			appendMessage(conversationId, "user", prompt);
 
-			// Provisional title immediately, so we don't wait for the end of streaming.
-			if (active.title === t(lang, "actions.newChat")) {
-				const provisional = prompt.replace(/\s+/g, " ").trim().slice(0, 48);
-				if (provisional) renameConversation(conversationId, provisional);
-			}
-
 			// Create assistant message with model info
 			const assistantMessageId = appendMessage(conversationId, "assistant", "", currentModel);
-			setStreaming(true);
+			setStreaming(true, conversationId);
 			setBriefTaskStatus(null);
 			setDetailedTaskStatus(null);
 
@@ -138,6 +133,17 @@ function ChatAppInner() {
 							}
 						setMessageContent(conversationId, assistantMessageId, content);
 					},
+					onMeta: (meta) => {
+						if (!meta || typeof meta !== "object") return;
+						const m = meta as Record<string, unknown>;
+						if (!titleApplied && m.type === "title" && typeof m.title === "string") {
+							const title = m.title.replace(/\s+/g, " ").trim();
+							if (title) {
+								renameConversation(conversationId, title);
+								titleApplied = true;
+							}
+						}
+					},
 				});
 
 				const { title, cleanContent } = extractSuggestedTitle(content);
@@ -160,7 +166,7 @@ function ChatAppInner() {
 				}
 			} finally {
 				controllerRef.current = null;
-				setStreaming(false);
+				setStreaming(false, null);
 				setBriefTaskStatus(null);
 				setDetailedTaskStatus(null);
 			}
@@ -183,13 +189,14 @@ function ChatAppInner() {
 
 	return (
 		<div className="flex h-screen w-screen overflow-hidden bg-zinc-950">
+			<HtmlLangSync lang={lang} />
 			{/* Sidebar */}
 			<Sidebar />
 
 			{/* Main content */}
 			<main className="relative flex h-full flex-1 flex-col min-w-0">
 				{/* Top bar */}
-				<header className="flex-shrink-0 flex items-center justify-between px-4 py-2.5 border-b border-white/[0.06] bg-zinc-950">
+				<header className="flex-shrink-0 flex items-center justify-between px-5 py-3 bg-zinc-950/70 backdrop-blur supports-[backdrop-filter]:bg-zinc-950/60">
 					<div className="flex items-center gap-3">
 						{/* Mobile menu button */}
 						{!state.sidebarOpen && (
@@ -197,7 +204,7 @@ function ChatAppInner() {
 								variant="ghost"
 								size="icon"
 								onClick={toggleSidebar}
-								className="text-zinc-400 hover:text-zinc-100"
+								className="text-zinc-500 hover:text-zinc-100"
 							>
 								<Icons.menu className="w-5 h-5" />
 							</Button>
@@ -220,7 +227,7 @@ function ChatAppInner() {
 							disabled={state.isStreaming}
 							onClick={() => void onExportConversation()}
 							title={t(lang, "actions.exportChat")}
-							className="text-zinc-400 hover:text-zinc-100"
+							className="text-zinc-500 hover:text-zinc-100"
 						>
 							{copied ? <Icons.check className="w-4 h-4" /> : <Icons.copy className="w-4 h-4" />}
 						</Button>
@@ -228,7 +235,7 @@ function ChatAppInner() {
 							variant="ghost"
 							size="icon"
 							onClick={() => router.push("/settings")}
-							className="text-zinc-400 hover:text-zinc-100"
+							className="text-zinc-500 hover:text-zinc-100"
 						>
 							<Icons.settings className="w-4 h-4" />
 						</Button>

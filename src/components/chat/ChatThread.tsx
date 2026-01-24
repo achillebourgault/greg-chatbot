@@ -5,6 +5,17 @@ import { useChatStore, getModelDisplayName, extractSuggestedTitle, type ChatMess
 import { Button, DinoLoader, Icons, Markdown, Skeleton, SourceCards } from "@/components/ui";
 import { t, type UiLanguage } from "@/i18n";
 
+function formatMessageTime(ts: number, lang: UiLanguage) {
+	try {
+		return new Date(ts).toLocaleTimeString(lang === "fr" ? "fr-FR" : "en-US", {
+			hour: "2-digit",
+			minute: "2-digit",
+		});
+	} catch {
+		return "";
+	}
+}
+
 function CopyButton({ content, title }: { content: string; title: string }) {
 	const [copied, setCopied] = useState(false);
 
@@ -35,6 +46,7 @@ function CopyButton({ content, title }: { content: string; title: string }) {
 	);
 }
 
+
 function RestartFromHereButton({ onClick, title, disabled }: { onClick: () => void; title: string; disabled?: boolean }) {
 	return (
 		<Button
@@ -60,10 +72,16 @@ type BubbleProps = {
 	isStreaming?: boolean;
 	briefStatusText?: string | null;
 	detailedStatusText?: string | null;
+	showContinue?: boolean;
+	onContinue?: () => void;
+	continueLabel?: string;
+	continueTitle?: string;
+	continueDisabled?: boolean;
 	lang: UiLanguage;
 };
 
 type ProgressPhase = "search" | "fetch" | "read" | "write";
+
 function parsePhaseToken(
 	s: string | null | undefined,
 ): { phase: ProgressPhase; index?: number; total?: number; url?: string } | null {
@@ -115,23 +133,27 @@ function extractUrlsFromText(text: string) {
 	}
 	return urls;
 }
+function isLikelyImageUrl(url: string): boolean {
+	const u = (url ?? "").trim().toLowerCase();
+	if (!u) return false;
+	if (u.startsWith("data:")) return true;
+	return /\.(png|jpe?g|gif|webp|avif|svg)(\?|#|$)/i.test(u);
+}
 
 function extractMarkdownLinkUrls(line: string): string[] {
 	const out: string[] = [];
-	const re = /\[[^\]]*\]\(\s*<?((?:https?:\/\/|www\.)[^)\s]+)>?\s*\)/gi;
+	// Match normal markdown links, but NOT markdown images (which start with '![').
+	const re = /(!)?\[[^\]]*\]\(\s*<?((?:https?:\/\/|www\.)[^)\s]+)>?\s*\)/gi;
 	let m: RegExpExecArray | null;
 	while ((m = re.exec(line)) !== null) {
-		const raw = m[1] ?? "";
+		if (m[1] === "!") continue;
+		const raw = m[2] ?? "";
 		let cleaned = raw.replace(/^[<\(\[]+/, "").replace(/[.,;:!?\)\]\>\"\']+$/g, "");
 		if (/^www\./i.test(cleaned)) cleaned = `https://${cleaned}`;
 		if (cleaned) out.push(cleaned);
 		if (out.length > 30) break;
 	}
 	return out;
-}
-
-function extractAllSourceUrls(text: string): string[] {
-	return uniqUrls([...extractUrlsFromText(text), ...extractMarkdownLinkUrls(text)]);
 }
 
 function isLikelyMarkdownSourceLine(line: string): boolean {
@@ -143,7 +165,9 @@ function isLikelyMarkdownSourceLine(line: string): boolean {
 	const mdUrls = extractMarkdownLinkUrls(cleaned);
 	if (mdUrls.length === 0) return false;
 	// If the line is mostly a link list item, treat it as a source line.
-	const withoutLinks = cleaned.replace(/\[[^\]]*\]\((https?:\/\/[^)\s]+)\)/gi, "").trim();
+	const withoutLinks = cleaned
+		.replace(/\[[^\]]*\]\(\s*<?(?:(?:https?:\/\/)|(?:www\.))[^)\s>]+>?\s*\)/gi, "")
+		.trim();
 	return withoutLinks.length <= 80;
 }
 
@@ -163,11 +187,15 @@ function uniqUrls(urls: string[]): string[] {
 function isMostlyUrlLine(line: string): boolean {
 	const s = line.trim();
 	if (!s) return false;
+	// Never treat markdown images as sources; images should render in-message.
+	if (/!\[[^\]]*\]\(\s*<?(?:https?:\/\/|www\.)/i.test(s)) return false;
 	// Common list formats: "- https://...", "1) https://...", "• https://..."
 	const cleaned = s.replace(/^[-*•]\s+/, "").replace(/^\d+[.)]\s+/, "");
 	if (!cleaned) return false;
 	const urls = extractUrlsFromText(cleaned);
 	if (urls.length === 0) return false;
+	// If it's only an image URL, do not treat it as a Source.
+	if (urls.every(isLikelyImageUrl)) return false;
 	// If the line is basically just the URL (or URL + short label), treat it as a source line.
 	const withoutUrl = cleaned.replace(/https?:\/\/[^\s)\]]+/gi, "").trim();
 	return withoutUrl.length <= 40;
@@ -175,9 +203,11 @@ function isMostlyUrlLine(line: string): boolean {
 
 function extractSourceUrlsFromLine(line: string): string[] {
 	if (!line.trim()) return [];
+	// Keep images in the message content; sources are for non-image links.
+	if (/!\[[^\]]*\]\(\s*<?(?:https?:\/\/|www\.)/i.test(line)) return [];
 	const urls = extractUrlsFromText(line);
 	const md = extractMarkdownLinkUrls(line);
-	return uniqUrls([...urls, ...md]);
+	return uniqUrls([...urls, ...md]).filter((u) => !isLikelyImageUrl(u));
 }
 
 function splitInlineSources(content: string): { before: string; sources: string[]; after: string } {
@@ -229,6 +259,11 @@ function splitInlineSources(content: string): { before: string; sources: string[
 			}
 		}
 
+		// If we didn't actually collect any URL sources, this likely wasn't a real Sources section.
+		if (!seenAny || uniqUrls(sources).length === 0) {
+			return { before: raw.trimEnd(), sources: [], after: "" };
+		}
+
 		for (let j = i; j < lines.length; j++) afterLines.push(lines[j] ?? "");
 		return {
 			before: beforeLines.join("\n").trimEnd(),
@@ -258,12 +293,33 @@ function splitInlineSources(content: string): { before: string; sources: string[
 		}
 		break;
 	}
-	if (uniqUrls(tailSources).length >= 2 && tailStart < lines.length) {
+	// Relaxed: show even a single source card if it's clearly a URL-only/markdown source line.
+	if (uniqUrls(tailSources).length >= 1 && collectedUrlLines >= 1 && tailStart < lines.length) {
 		const before = lines.slice(0, tailStart).join("\n").trimEnd();
 		return { before, sources: uniqUrls(tailSources), after: "" };
 	}
 
 	return { before: raw.trimEnd(), sources: [], after: "" };
+}
+
+function extractLooseInlineSourceUrls(content: string): string[] {
+	const raw = (content ?? "").replaceAll("\r\n", "\n");
+	const lines = raw.split("\n");
+	const out: string[] = [];
+	for (const line of lines) {
+		// Treat only source-like list lines to avoid picking up arbitrary links in the prose.
+		if (isMostlyUrlLine(line) || isLikelyMarkdownSourceLine(line)) {
+			out.push(...extractSourceUrlsFromLine(line));
+			if (out.length >= 30) break;
+			continue;
+		}
+		// Also accept explicit inline "Sources:" lines.
+		if (/\bsources?\b\s*:/i.test(line) || /\br[ée]f[ée]rences\b\s*:/i.test(line) || /\bliens?\b\s*:/i.test(line)) {
+			out.push(...extractSourceUrlsFromLine(line));
+			if (out.length >= 30) break;
+		}
+	}
+	return uniqUrls(out);
 }
 
 
@@ -281,13 +337,53 @@ function phaseLoaderLine(phase: ProgressPhase, lang: UiLanguage, url?: string) {
 	}
 }
 
-function Bubble({ message, showModelFooter, copyTitle, restartTitle, onRestartFromHere, disableRestart, isStreaming, briefStatusText, detailedStatusText, lang }: BubbleProps) {
+
+function Bubble({ message, showModelFooter, copyTitle, restartTitle, onRestartFromHere, disableRestart, isStreaming, briefStatusText, detailedStatusText, showContinue, onContinue, continueLabel, continueTitle, continueDisabled, lang }: BubbleProps) {
 	const isUser = message.role === "user";
 	const { cleanContent } = extractSuggestedTitle(message.content);
 	const showProgress = Boolean(isStreaming) && !isUser;
 	const hasAssistantContent = !isUser && cleanContent.trim().length > 0;
-	const inlineSources = useMemo(() => (!isUser ? splitInlineSources(cleanContent) : { before: cleanContent, sources: [], after: "" }), [cleanContent, isUser]);
-	const fallbackUrls = useMemo(() => (!isUser ? extractAllSourceUrls(cleanContent) : []), [cleanContent, isUser]);
+	const time = formatMessageTime(message.createdAt, lang);
+	const inlineSources = useMemo(
+		() => (!isUser ? splitInlineSources(cleanContent) : { before: cleanContent, sources: [], after: "" }),
+		[cleanContent, isUser],
+	);
+
+	// Sticky sources: once we see at least one source URL during streaming, keep the component
+	// visible and append newly detected URLs instead of flickering on/off.
+	const looseSources = useMemo(
+		() => (!isUser ? extractLooseInlineSourceUrls(cleanContent) : []),
+		[cleanContent, isUser],
+	);
+	const candidateSources = useMemo(
+		() => (!isUser ? uniqUrls([...(inlineSources.sources ?? []), ...looseSources]) : []),
+		[inlineSources.sources, isUser, looseSources],
+	);
+	const [stickySources, setStickySources] = useState<string[]>([]);
+	useEffect(() => {
+		// Reset per message.
+		let rafId: number | null = null;
+		rafId = window.requestAnimationFrame(() => setStickySources([]));
+		return () => {
+			if (rafId) cancelAnimationFrame(rafId);
+		};
+	}, [message.id]);
+	useEffect(() => {
+		if (isUser) return;
+		if (candidateSources.length === 0) return;
+		let rafId: number | null = null;
+		rafId = window.requestAnimationFrame(() => {
+			setStickySources((prev) => {
+				const merged = uniqUrls([...prev, ...candidateSources]);
+				return merged.length === prev.length ? prev : merged;
+			});
+		});
+		return () => {
+			if (rafId) cancelAnimationFrame(rafId);
+		};
+	}, [candidateSources, isUser]);
+
+	const sourcesForCards = stickySources.length ? stickySources : candidateSources;
 
 	const phaseInfo = useMemo(
 		() => parsePhaseToken(detailedStatusText) ?? parsePhaseToken(briefStatusText),
@@ -301,6 +397,7 @@ function Bubble({ message, showModelFooter, copyTitle, restartTitle, onRestartFr
 		? phaseLoaderLine(phaseInfo.phase, lang, phaseInfo.url)
 		: t(lang, "progress.generating");
 	const loaderOnly = showDinoLoader && !hasAssistantContent;
+	const approxTokens = !isUser ? Math.max(0, Math.round((cleanContent ?? "").length / 4)) : 0;
 	const [showSkeleton, setShowSkeleton] = useState(false);
 	useEffect(() => {
 		let clearId: number | null = null;
@@ -325,105 +422,84 @@ function Bubble({ message, showModelFooter, copyTitle, restartTitle, onRestartFr
 		};
 	}, [showProgress, showToolProgress, hasAssistantContent, message.id]);
 
+	const authorLabel = isUser ? t(lang, "thread.you") : t(lang, "app.name");
+	const roleIcon = isUser ? <Icons.user className="w-5 h-5 text-zinc-300" /> : <Icons.greg className="w-6 h-6" />;
+
 	return (
-		<div
-			className={`
-				group flex gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300
-				${isUser ? "flex-row-reverse" : "flex-row"}
-			`}
-		>
-			{/* Avatar */}
-			<div className="flex-shrink-0 mt-1">
-				{isUser ? (
-					<div className="w-9 h-9 rounded-xl bg-zinc-800 flex items-center justify-center border border-white/[0.08]">
-						<Icons.user className="w-5 h-5 text-zinc-400" />
+		<div className="group animate-in fade-in slide-in-from-bottom-2 duration-300">
+			<div className="flex gap-4">
+				<div className="flex-shrink-0 pt-0.5">
+					<div className="w-8 h-8 rounded-full bg-white/[0.03] border border-white/[0.08] flex items-center justify-center">
+						{roleIcon}
 					</div>
-				) : (
-					<div className="w-9 h-9 rounded-xl bg-zinc-800 flex items-center justify-center border border-white/[0.08]">
-						<Icons.greg className="w-6 h-6" />
-					</div>
-				)}
-			</div>
-
-			{/* Content */}
-			<div
-				className={`flex flex-col gap-1.5 ${
-					loaderOnly
-						? "w-full max-w-none"
-						: isUser
-							? "max-w-[78%]"
-							: "max-w-[92%]"
-				} ${isUser ? "items-end" : "items-start"}`}
-			>
-				{/* Message bubble */}
-				<div
-					className={`
-						relative rounded-2xl px-4 py-3 text-sm leading-relaxed
-						${isUser
-							? "bg-zinc-100 text-zinc-950 rounded-tr-md"
-							: loaderOnly
-								? "bg-transparent text-zinc-100 border border-transparent rounded-tl-md p-0"
-								: "bg-white/[0.03] text-zinc-100 border border-white/[0.06] rounded-tl-md"
-						}
-					`}
-				>
-					<div className="break-words">
-						{showDinoLoader && phaseInfo ? (
-							<div className={loaderOnly ? "" : "mb-3"}>
-								<DinoLoader subtitle={dinoSubtitle} />
-							</div>
-						) : showDinoLoader ? (
-							<div className={loaderOnly ? "" : "mb-3"}>
-								<DinoLoader subtitle={dinoSubtitle} />
-							</div>
-						) : null}
-						{isUser ? (
-							<div className="whitespace-pre-wrap">{cleanContent}</div>
-						) : cleanContent.trim().length ? (
-							<>
-								{inlineSources.before.trim().length ? <Markdown content={inlineSources.before} /> : null}
-								{inlineSources.sources.length ? (
-									<SourceCards urls={inlineSources.sources} lang={lang} maxInitial={3} />
-								) : fallbackUrls.length ? (
-									<SourceCards urls={fallbackUrls} lang={lang} maxInitial={3} />
-								) : null}
-								{inlineSources.after.trim().length ? <Markdown content={inlineSources.after} /> : null}
-							</>
-						) : null}
-					</div>
-
-					{/* Sources are rendered inline (not duplicated below). */}
-
-					{/* Simple-answer skeleton (kept). Tool/MCP loader uses DinoLoader above. */}
-					{showProgress && showSkeleton ? (
-						<div className={`mt-2 ${isComplexProgress ? "w-[280px]" : "w-[180px]"} space-y-2`}>
-							<Skeleton variant="text" width={isComplexProgress ? "92%" : "55%"} height={10} />
-							{isComplexProgress ? <Skeleton variant="text" width="76%" height={10} /> : null}
-							{isComplexProgress ? <Skeleton variant="text" width="64%" height={10} /> : null}
-						</div>
-					) : null}
 				</div>
 
-				{/* Model label (only on last assistant message, after streaming) */}
-				{!isUser && showModelFooter && (
-					<div className="px-1 text-[10px] text-zinc-500">
-						{getModelDisplayName(message.model ?? "")}
-					</div>
-				)}
+				<div className="min-w-0 flex-1">
+					<div className="flex items-start justify-between gap-3">
+						<div className="min-w-0">
+							<div className="flex items-center gap-2">
+								<div className={`text-[13px] font-semibold truncate ${isUser ? "text-zinc-200" : "text-zinc-100"}`}>
+									{authorLabel}
+								</div>
+								{time ? <div className="text-[12px] text-zinc-600">{time}</div> : null}
+								{!isUser && showModelFooter ? (
+									<div className="text-[12px] text-zinc-600 truncate">• {getModelDisplayName(message.model ?? "")}</div>
+								) : null}
+							</div>
+						</div>
 
-				{/* Actions */}
-				{(onRestartFromHere || (!isUser && cleanContent)) && (
-					<div className="flex items-center gap-1">
-						{onRestartFromHere ? (
-							<RestartFromHereButton
-								onClick={onRestartFromHere}
-								title={restartTitle}
-								disabled={disableRestart}
-							/>
-						) : null}
-						{!isUser && cleanContent ? <CopyButton content={cleanContent} title={copyTitle} /> : null}
+						<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+							{onRestartFromHere ? (
+								<RestartFromHereButton onClick={onRestartFromHere} title={restartTitle} disabled={disableRestart} />
+							) : null}
+							{!isUser && showContinue && onContinue ? (
+								<Button
+									variant="secondary"
+									size="xs"
+									onClick={onContinue}
+									disabled={continueDisabled}
+									title={continueTitle}
+								>
+									{continueLabel}
+								</Button>
+							) : null}
+							{cleanContent ? <CopyButton content={cleanContent} title={copyTitle} /> : null}
+						</div>
 					</div>
-				)}
+
+					<div className="mt-2 text-[15px] leading-7 text-zinc-100">
+						{showDinoLoader ? (
+							<div className={loaderOnly ? "" : "mb-4"}>
+								<DinoLoader subtitle={dinoSubtitle} tokens={approxTokens} />
+							</div>
+						) : null}
+
+						{cleanContent.trim().length ? (
+							<>
+								{isUser ? (
+									<Markdown content={cleanContent} lang={lang} />
+								) : (
+									<>
+										{inlineSources.before.trim().length ? <Markdown content={inlineSources.before} lang={lang} /> : null}
+										{inlineSources.after.trim().length ? <Markdown content={inlineSources.after} lang={lang} /> : null}
+									</>
+								)}
+							</>
+						) : null}
+
+						{!isUser && sourcesForCards.length ? (
+							<SourceCards key={message.id} urls={sourcesForCards} lang={lang} maxInitial={3} />
+						) : null}
+
+						{showProgress && showSkeleton ? (
+							<div className={`mt-3 ${isComplexProgress ? "w-[320px]" : "w-[220px]"} space-y-2`}>
+								<Skeleton variant="text" width={isComplexProgress ? "92%" : "55%"} height={10} />
+								{isComplexProgress ? <Skeleton variant="text" width="76%" height={10} /> : null}
+								{isComplexProgress ? <Skeleton variant="text" width="64%" height={10} /> : null}
+							</div>
+						) : null}
+					</div>
+				</div>
 			</div>
 		</div>
 	);
@@ -470,14 +546,22 @@ function WelcomeMessage() {
 type ThreadProps = {
 	briefStatusText?: string | null;
 	detailedStatusText?: string | null;
+	continueMessageId?: string | null;
+	onContinue?: () => void;
+	continueLabel?: string;
+	continueTitle?: string;
+	continueDisabled?: boolean;
 };
 
-export function ChatThread({ briefStatusText, detailedStatusText }: ThreadProps) {
+export function ChatThread({ briefStatusText, detailedStatusText, continueMessageId, onContinue, continueLabel, continueTitle, continueDisabled }: ThreadProps) {
 	const { active, state, restartEditableFromUserMessage } = useChatStore();
 	const lang = state.settings.uiLanguage;
 	const anchorRef = useRef<HTMLDivElement | null>(null);
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const pinnedRef = useRef(true);
+	const lastScrollTopRef = useRef(0);
+	const [followOutput, setFollowOutput] = useState(true);
+	const [isNearBottom, setIsNearBottom] = useState(true);
 
 	const messages = useMemo(() => active.messages, [active.messages]);
 	const tailContentLen = messages.length ? (messages[messages.length - 1]?.content?.length ?? 0) : 0;
@@ -490,8 +574,13 @@ export function ChatThread({ briefStatusText, detailedStatusText }: ThreadProps)
 
 	useEffect(() => {
 		pinnedRef.current = true;
-		// Jump to bottom on conversation switch.
-		requestAnimationFrame(() => anchorRef.current?.scrollIntoView({ behavior: "auto", block: "end" }));
+		// Jump to bottom on conversation switch and re-enable follow.
+		const id = requestAnimationFrame(() => {
+			setFollowOutput(true);
+			setIsNearBottom(true);
+			anchorRef.current?.scrollIntoView({ behavior: "auto", block: "end" });
+		});
+		return () => cancelAnimationFrame(id);
 	}, [active.id]);
 
 	useEffect(() => {
@@ -499,33 +588,53 @@ export function ChatThread({ briefStatusText, detailedStatusText }: ThreadProps)
 		if (!el) return;
 		const thresholdPx = 140;
 		const onScroll = () => {
+			const prevTop = lastScrollTopRef.current;
+			lastScrollTopRef.current = el.scrollTop;
+			// If the user scrolls up at all, stop following immediately.
+			// (Even if we're still "near bottom" within the threshold.)
+			if (el.scrollTop < prevTop - 2) setFollowOutput(false);
 			const distance = el.scrollHeight - (el.scrollTop + el.clientHeight);
 			const pinned = distance < thresholdPx;
 			pinnedRef.current = pinned;
+			setIsNearBottom(pinned);
+			// As soon as the user scrolls up (not near bottom anymore), stop following.
+			if (!pinned) setFollowOutput(false);
 		};
-		onScroll();
+		const id = requestAnimationFrame(onScroll);
 		el.addEventListener("scroll", onScroll, { passive: true });
-		return () => el.removeEventListener("scroll", onScroll);
+		return () => {
+			cancelAnimationFrame(id);
+			el.removeEventListener("scroll", onScroll);
+		};
 	}, []);
 
 	useEffect(() => {
 		// Keep the viewport pinned to the newest tokens while streaming,
 		// but never fight the user if they scroll up manually.
+		if (!followOutput) return;
 		if (!pinnedRef.current) return;
 		const behavior: ScrollBehavior = state.isStreaming ? "auto" : "smooth";
 		requestAnimationFrame(() => anchorRef.current?.scrollIntoView({ behavior, block: "end" }));
-	}, [messages.length, tailContentLen, state.isStreaming]);
+	}, [messages.length, tailContentLen, state.isStreaming, followOutput]);
+
+	const showFollowButton = messages.length > 0 && !followOutput;
+	const handleFollowClick = () => {
+		pinnedRef.current = true;
+		setFollowOutput(true);
+		setIsNearBottom(true);
+		requestAnimationFrame(() => anchorRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }));
+	};
 
 	return (
 		<div
 			ref={containerRef}
-			className={`flex-1 overflow-auto px-4 ${state.isStreaming ? "pt-0" : "pt-3"} pb-6 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20`}
+			className={`flex-1 overflow-auto px-4 ${state.isStreaming ? "pt-5" : "pt-7"} pb-32 sm:pb-36 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20`}
 		>
-			<div className="mx-auto w-full max-w-5xl">
+			<div className="mx-auto w-full max-w-3xl">
 				{messages.length === 0 ? (
 					<WelcomeMessage />
 				) : (
-					<div className="flex flex-col gap-6">
+					<div className="flex flex-col gap-10">
 						{messages.map((message, index) => {
 							const isLastAssistant =
 								message.role === "assistant" &&
@@ -541,14 +650,27 @@ export function ChatThread({ briefStatusText, detailedStatusText }: ThreadProps)
 								? (message.model ?? active.model)
 								: message.model;
 
+							const showContinue =
+								!state.isStreaming &&
+								message.role === "assistant" &&
+								index === lastAssistantIndex &&
+								!!continueMessageId &&
+								continueMessageId === message.id &&
+								!!onContinue;
+
 							const canRestartEditable = message.role === "user";
-							const bubble = (
+							return (
 								<Bubble
 									key={message.id}
 									message={{ ...message, model: modelForThisMessage }}
 									showModelFooter={showModelFooter}
 									copyTitle={t(lang, "actions.copy")}
 									restartTitle={t(lang, "actions.restartFromHere")}
+									showContinue={showContinue}
+									onContinue={onContinue}
+									continueLabel={continueLabel}
+									continueTitle={continueTitle}
+									continueDisabled={continueDisabled}
 									onRestartFromHere={
 										canRestartEditable
 											? () => restartEditableFromUserMessage(active.id, message.id)
@@ -561,19 +683,26 @@ export function ChatThread({ briefStatusText, detailedStatusText }: ThreadProps)
 									lang={lang}
 								/>
 							);
-
-							if (!isLastAssistant) return bubble;
-							return (
-								<div key={message.id} className="sticky top-0 z-30 bg-transparent">
-									{bubble}
-								</div>
-							);
 						})}
-
 					</div>
 				)}
 				<div ref={anchorRef} className="h-4" />
 			</div>
+
+			{showFollowButton ? (
+				<div className="fixed right-4 sm:right-6 bottom-28 sm:bottom-32 z-40">
+					<Button
+						variant="secondary"
+						size="icon"
+						onClick={handleFollowClick}
+						title={t(lang, "thread.followOutput")}
+						aria-label={t(lang, "thread.followOutput")}
+						className={`shadow-[0_12px_40px_rgba(0,0,0,0.45)] backdrop-blur ${isNearBottom ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+					>
+						<Icons.arrowDown className="w-4 h-4" />
+					</Button>
+				</div>
+			) : null}
 		</div>
 	);
 }

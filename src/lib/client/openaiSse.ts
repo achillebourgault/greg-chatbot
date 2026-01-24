@@ -1,5 +1,6 @@
 type StreamHandlers = {
 	onTextDelta: (delta: string) => void;
+	onMeta?: (meta: unknown) => void;
 	onDone?: () => void;
 };
 
@@ -42,6 +43,12 @@ export async function consumeOpenAiSse(
 			}
 
 			const chunk = parsed as OpenAiStreamChunk;
+
+			// Custom out-of-band events from our server (never shown to user).
+			if (parsed && typeof parsed === "object" && "greg" in parsed) {
+				handlers.onMeta?.((parsed as { greg: unknown }).greg);
+				continue;
+			}
 			const delta = chunk.choices?.[0]?.delta?.content;
 			if (typeof delta === "string" && delta.length > 0) {
 				handlers.onTextDelta(delta);
