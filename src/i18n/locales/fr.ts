@@ -131,7 +131,7 @@ export const frDict: Dict = {
 	"settings.instructions.placeholder.panel": "(optionnel) Ajoute des règles spécifiques à ce projet…",
 	"settings.instructions.placeholder.page": "Ex: réponds en bullet points, mentionne les sources…",
 	"settings.instructions.alwaysActive": "Toujours actifs:",
-	"settings.instructions.alwaysActiveItems": "DEFAULT_GREG_INSTRUCTIONS + Créateur",
+	"settings.instructions.alwaysActiveItems": "DEFAULT_GREG_INSTRUCTIONS",
 	"settings.instructions.noteTitle": "Note",
 	"settings.instructions.noteBody": ({ filePath }) =>
 		`Les instructions par défaut ne sont pas éditées ici. Pour changer la base, édite ${filePath}.`,

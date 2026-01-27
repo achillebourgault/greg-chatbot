@@ -166,7 +166,7 @@ export function ProviderStack({ conversation }: { conversation: Conversation }) 
 				{modelIcons.slice(0, 6).map((p) => (
 					<div
 						key={p.id}
-						className="w-8 h-8 rounded-full border border-white/[0.10] bg-zinc-900 overflow-hidden shadow-sm"
+						className="w-8 h-8 rounded-full border border-[var(--glass-border)] bg-[var(--bg-elevated)] overflow-hidden shadow-md shadow-black/30 ring-2 ring-[var(--bg-base)] hover:ring-[var(--glass-border-hover)] hover:scale-110 transition-all duration-200"
 						title={`${p.label} (${p.providerLabel})`}
 					>
 						<ProviderIcon
@@ -179,43 +179,48 @@ export function ProviderStack({ conversation }: { conversation: Conversation }) 
 					</div>
 				))}
 				{modelIcons.length > 6 ? (
-					<div className="w-8 h-8 rounded-full border border-white/[0.10] bg-zinc-800 flex items-center justify-center text-[11px] text-zinc-200">
+					<div className="w-8 h-8 rounded-full border border-[var(--glass-border)] bg-[var(--glass-bg)] flex items-center justify-center text-[11px] font-medium text-[var(--text-secondary)] ring-2 ring-[var(--bg-base)]">
 						+{modelIcons.length - 6}
 					</div>
 				) : null}
 			</div>
 
-			{/* Hover panel */}
-			<div className="pointer-events-none opacity-0 group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 absolute left-0 top-full mt-2 w-[360px] z-50">
-				<div className="rounded-xl bg-zinc-900 border border-white/[0.10] shadow-xl shadow-black/50 overflow-hidden">
-					<div className="px-4 py-3 border-b border-white/[0.06]">
-						<div className="text-sm font-medium text-zinc-100">{t(lang, "providerStack.title")}</div>
-						<div className="text-[11px] text-zinc-500 mt-0.5">
+			
+			<div className="pointer-events-none opacity-0 group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 absolute left-0 top-full mt-3 w-[380px] z-50">
+				<div className="rounded-[var(--radius-xl)] glass-strong border border-[var(--glass-border)] shadow-2xl shadow-black/30 overflow-hidden">
+					<div className="px-5 py-4 border-b border-[var(--glass-border)] bg-[var(--glass-bg-subtle)]">
+						<div className="text-sm font-semibold text-[var(--text-primary)]">{t(lang, "providerStack.title")}</div>
+						<div className="text-[11px] text-[var(--text-muted)] mt-1">
 							{t(lang, "providerStack.subtitle", { loadingPricing: !ready })}
 						</div>
 					</div>
-					<div className="p-2 max-h-[340px] overflow-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10">
+					<div className="p-2 max-h-[340px] overflow-auto scrollbar-premium">
 						{usage.map((m) => (
-							<div key={m.modelId} className="p-2">
+							<div key={m.modelId} className="p-2 rounded-[var(--radius-lg)] hover:bg-[var(--glass-bg-subtle)] transition-colors">
 								<div className="flex items-center justify-between gap-3 px-2">
-									<div className="flex items-center gap-2 min-w-0">
-										<div className="w-7 h-7 rounded-full border border-white/[0.10] bg-zinc-950 overflow-hidden">
+									<div className="flex items-center gap-3 min-w-0">
+										<div className="w-8 h-8 rounded-[var(--radius-lg)] border border-[var(--glass-border)] bg-[var(--glass-bg-subtle)] overflow-hidden">
 											<ProviderIcon
 												src={m.iconUrl}
 												fallback={m.fallbackIconSrc}
 												alt={m.providerLabel}
-												size={28}
+												size={32}
 												className="w-full h-full object-cover"
 											/>
 										</div>
 										<div className="min-w-0">
-											<div className="text-[13px] text-zinc-200 truncate">{m.label}</div>
-											<div className="text-[11px] text-zinc-500 truncate">{m.modelId}</div>
-											<div className="text-[11px] text-zinc-500 truncate">{m.providerLabel}</div>
+											<div className="text-[13px] font-medium text-[var(--text-primary)] truncate">{m.label}</div>
+											<div className="text-[11px] text-[var(--text-muted)] truncate">{m.providerLabel}</div>
 										</div>
 									</div>
-									<div className="text-[13px] text-zinc-200 flex-shrink-0">
-										{m.free ? t(lang, "modelPicker.badge.free") : formatMoneyUsd(m.totalUsd)}
+									<div className="flex-shrink-0">
+										{m.free ? (
+											<span className="px-2 py-0.5 rounded-full bg-[var(--accent-green)]/15 border border-[var(--accent-green)]/20 text-[11px] font-medium text-[var(--accent-green)]">
+												{t(lang, "modelPicker.badge.free")}
+											</span>
+										) : (
+											<span className="text-sm font-semibold text-[var(--text-primary)]">{formatMoneyUsd(m.totalUsd)}</span>
+										)}
 									</div>
 								</div>
 							</div>

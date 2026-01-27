@@ -127,7 +127,7 @@ export const enDict: Dict = {
 	"settings.instructions.placeholder.panel": "(optional) Add project-specific rules…",
 	"settings.instructions.placeholder.page": "E.g. answer in bullet points, mention sources…",
 	"settings.instructions.alwaysActive": "Always active:",
-	"settings.instructions.alwaysActiveItems": "DEFAULT_GREG_INSTRUCTIONS + Creator",
+	"settings.instructions.alwaysActiveItems": "DEFAULT_GREG_INSTRUCTIONS",
 	"settings.instructions.noteTitle": "Note",
 	"settings.instructions.noteBody": ({ filePath }) =>
 		`Default instructions aren’t edited here. To change the base, edit ${filePath}.`,

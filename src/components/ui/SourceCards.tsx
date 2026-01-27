@@ -60,16 +60,16 @@ function SourceChip({ href, lang }: { href: string; lang: UiLanguage }) {
 			href={href}
 			target="_blank"
 			rel="noreferrer noopener"
-			className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-2 py-1 text-[12px] text-zinc-200 hover:bg-white/[0.06] hover:border-white/[0.12] transition-colors"
+			className="inline-flex items-center gap-2 rounded-full border border-[var(--glass-border)] bg-[var(--glass-bg-subtle)] px-3 py-1.5 text-[12px] text-[var(--text-secondary)] hover:bg-[var(--glass-bg)] hover:border-[var(--glass-border-hover)] transition-colors duration-200"
 			title={title}
 			aria-label={`${t(lang, "sourceCards.title")}: ${title}`}
 		>
 			<img
 				src={iconEndpointFor(href)}
 				alt=""
-				width={12}
-				height={12}
-				className="w-3 h-3 rounded-sm opacity-90"
+				width={14}
+				height={14}
+				className="w-3.5 h-3.5 rounded-sm opacity-90"
 				onError={(e) => {
 					const img = e.currentTarget;
 					if (img.dataset.fallbackApplied) return;
@@ -109,18 +109,18 @@ export function SourceCards({ urls, lang, maxInitial = 3 }: { urls: string[]; la
 	const count = filtered.length;
 
 	return (
-		<div className="mt-4">
+		<div className="mt-5">
 			<div className="flex items-center justify-between gap-3">
 				<div className="flex items-center gap-2 min-w-0">
-					<div className="text-[12px] text-zinc-500">{t(lang, "sourceCards.title")}</div>
-					<div className="text-[12px] text-zinc-600">·</div>
-					<div className="text-[12px] text-zinc-500 tabular-nums">{count}</div>
+					<div className="text-[12px] font-medium text-[var(--text-tertiary)]">{t(lang, "sourceCards.title")}</div>
+					<div className="h-1 w-1 rounded-full bg-[var(--text-muted)]" />
+					<div className="text-[12px] text-[var(--text-muted)] tabular-nums">{count}</div>
 				</div>
 				{remainingWhenClosed > 0 ? (
 					<button
 						type="button"
 						onClick={() => setOpen((v) => !v)}
-						className="text-[12px] text-zinc-500 hover:text-zinc-200 transition-colors"
+						className="text-[12px] text-[var(--text-muted)] hover:text-[var(--accent-cyan)] transition-colors"
 						aria-expanded={open}
 					>
 						{open
@@ -130,7 +130,7 @@ export function SourceCards({ urls, lang, maxInitial = 3 }: { urls: string[]; la
 				) : null}
 			</div>
 
-			<div className="mt-2 flex flex-wrap gap-2">
+			<div className="mt-3 flex flex-wrap gap-2">
 				{shown.map((u) => (
 					<SourceChip key={u} href={u} lang={lang} />
 				))}
@@ -138,7 +138,7 @@ export function SourceCards({ urls, lang, maxInitial = 3 }: { urls: string[]; la
 					<button
 						type="button"
 						onClick={() => setOpen(true)}
-						className="inline-flex items-center rounded-full border border-white/[0.08] bg-transparent px-2 py-1 text-[12px] text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors"
+						className="inline-flex items-center rounded-full border border-[var(--glass-border)] bg-transparent px-3 py-1.5 text-[12px] text-[var(--text-muted)] hover:text-[var(--accent-cyan)] hover:bg-[var(--accent-cyan)]/10 hover:border-[var(--accent-cyan)]/30 transition-all duration-200"
 						title={t(lang, "sourceCards.showMore", { count: remaining })}
 					>
 						+{remaining}

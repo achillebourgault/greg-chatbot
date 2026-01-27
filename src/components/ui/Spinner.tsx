@@ -8,7 +8,7 @@ export function Spinner({ className, size = "md" }: { className?: string; size?:
 	return (
 		<div
 			className={[
-				"animate-spin rounded-full border-emerald-500/20 border-t-emerald-400",
+				"animate-spin rounded-full border-[var(--accent-cyan)]/20 border-t-[var(--accent-cyan)]",
 				sizes[size],
 				className,
 			]
@@ -20,10 +20,10 @@ export function Spinner({ className, size = "md" }: { className?: string; size?:
 
 export function LoadingDots({ className }: { className?: string }) {
 	return (
-		<div className={`flex items-center gap-1 ${className ?? ""}`}>
-			<span className="h-2 w-2 rounded-full bg-emerald-400 animate-bounce [animation-delay:-0.3s]" />
-			<span className="h-2 w-2 rounded-full bg-cyan-400 animate-bounce [animation-delay:-0.15s]" />
-			<span className="h-2 w-2 rounded-full bg-emerald-400 animate-bounce" />
+		<div className={`flex items-center gap-1.5 ${className ?? ""}`}>
+			<span className="h-2 w-2 rounded-full bg-[var(--accent-cyan)] animate-bounce [animation-delay:-0.3s]" />
+			<span className="h-2 w-2 rounded-full bg-[var(--accent-orange)] animate-bounce [animation-delay:-0.15s]" />
+			<span className="h-2 w-2 rounded-full bg-[var(--accent-green)] animate-bounce" />
 		</div>
 	);
 }

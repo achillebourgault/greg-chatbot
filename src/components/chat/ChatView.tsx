@@ -379,14 +379,15 @@ export function ChatView() {
 
 	return (
 		<div className="relative flex h-full flex-1 flex-col min-w-0">
-			<header className="flex-shrink-0 flex items-center justify-between px-4 py-2.5 border-b border-white/[0.06] bg-zinc-950">
+			
+			<header className="flex-shrink-0 flex items-center justify-between h-[var(--nav-height)] px-5 border-b border-[var(--glass-border)] glass">
 				<div className="flex items-center gap-3">
 					{!state.sidebarOpen && (
 						<Button
 							variant="ghost"
 							size="icon"
 							onClick={toggleSidebar}
-							className="text-zinc-400 hover:text-zinc-100"
+							className="text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[rgba(255,255,255,0.06)] w-9 h-9"
 						>
 							<Icons.menu className="w-5 h-5" />
 						</Button>
@@ -395,63 +396,64 @@ export function ChatView() {
 					<div className="flex items-center gap-3">
 						<ProviderStack conversation={active} />
 						<div className="min-w-0">
-							<h1 className="text-sm font-medium text-zinc-100 truncate">{active.title}</h1>
+							<h1 className="text-[14px] font-semibold text-[var(--text-primary)]/90 truncate max-w-[200px] sm:max-w-xs">{active.title}</h1>
 						</div>
 					</div>
 				</div>
 
-				<div className="flex items-center gap-2">
-					<Button
-						variant="ghost"
-						size="sm"
+				<div className="flex items-center gap-1">
+					<button
 						onClick={() => void openContext()}
-						title="Show Context"
-						className="text-zinc-300"
+						className="group flex items-center gap-2 h-8 px-3 rounded-[var(--radius-lg)] text-[12px] font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[rgba(255,255,255,0.06)] transition-all duration-200"
 					>
-						Show Context
-					</Button>
-					<Button
-						variant="ghost"
-						size="icon"
+						<Icons.codeXML className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100" />
+						<span className="hidden sm:inline">Context</span>
+					</button>
+					<button
 						disabled={state.isStreaming}
 						onClick={() => void onExportConversation()}
 						title={t(lang, "actions.exportChat")}
-						className="text-zinc-400 hover:text-zinc-100"
+						className="flex items-center justify-center w-8 h-8 rounded-[var(--radius-lg)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[rgba(255,255,255,0.06)] transition-all duration-200 disabled:opacity-40"
 					>
-						{copied ? <Icons.check className="w-4 h-4" /> : <Icons.copy className="w-4 h-4" />}
-					</Button>
-					<Button
-						variant="ghost"
-						size="icon"
+						{copied ? <Icons.check className="w-4 h-4 text-[var(--accent-green)]" /> : <Icons.copy className="w-4 h-4" />}
+					</button>
+					<button
 						onClick={() => router.push("/settings")}
-						className="text-zinc-400 hover:text-zinc-100"
+						className="flex items-center justify-center w-8 h-8 rounded-[10px] text-[#8A8F98] hover:text-[#F9F9FB] hover:bg-[rgba(255,255,255,0.06)] transition-all duration-200"
 						title={t(lang, "actions.settings")}
 					>
 						<Icons.settings className="w-4 h-4" />
-					</Button>
+					</button>
 				</div>
 			</header>
 
+		
 		{contextOpen && (
-			<div className="fixed inset-0 z-50 flex items-center justify-center">
+			<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+				
 				<div
-					className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+					className="absolute inset-0 bg-[var(--bg-overlay)] backdrop-blur-md animate-fade-in"
 					onClick={() => setContextOpen(false)}
 				/>
-				<div className="relative w-full max-w-5xl max-h-[88vh] mx-4 rounded-2xl bg-zinc-900 border border-white/[0.08] shadow-2xl shadow-black/50 animate-in zoom-in-95 fade-in duration-300 overflow-hidden flex flex-col">
-					<div className="flex-shrink-0 flex items-center justify-between p-4 border-b border-white/[0.06]">
+				
+				<div className="relative w-full max-w-5xl max-h-[88vh] rounded-[var(--radius-2xl)] glass-strong shadow-[var(--shadow-xl)] animate-scale-in overflow-hidden flex flex-col">
+					
+						<div className="flex-shrink-0 flex items-center justify-between p-5 border-b border-[var(--glass-border)] bg-[rgba(255,255,255,0.02)]">
 						<div className="min-w-0">
-							<div className="text-sm font-semibold text-zinc-100 truncate">{t(lang, "contextModal.title")}</div>
-							<div className="text-xs text-zinc-500 truncate">{t(lang, "contextModal.subtitle")}</div>
+							<div className="text-[16px] font-semibold text-[var(--text-primary)]">{t(lang, "contextModal.title")}</div>
+							<div className="text-[12px] text-[var(--text-subtle)] mt-0.5">{t(lang, "contextModal.subtitle")}</div>
 						</div>
 						<div className="flex items-center gap-2">
-							<div className="flex items-center rounded-lg border border-white/[0.08] bg-white/[0.02] overflow-hidden">
+							
+							<div className="flex items-center p-0.5 rounded-[var(--radius-lg)] bg-[rgba(255,255,255,0.04)] border border-[var(--glass-border)]">
 								<button
 									type="button"
 									onClick={() => setContextTab("withTools")}
 									className={[
-										"h-8 px-3 text-xs transition-colors",
-										contextTab === "withTools" ? "bg-white/[0.10] text-zinc-100" : "text-zinc-400 hover:text-zinc-200",
+										"h-8 px-4 rounded-[var(--radius-lg)] text-[12px] font-medium transition-all duration-200",
+										contextTab === "withTools" 
+											? "bg-[rgba(255,255,255,0.08)] text-[var(--text-primary)]" 
+											: "text-[var(--text-muted)] hover:text-[var(--text-primary)]",
 									].join(" ")}
 								>
 									{t(lang, "contextModal.tab.withTools")}
@@ -460,29 +462,58 @@ export function ChatView() {
 									type="button"
 									onClick={() => setContextTab("base")}
 									className={[
-										"h-8 px-3 text-xs transition-colors",
-										contextTab === "base" ? "bg-white/[0.10] text-zinc-100" : "text-zinc-400 hover:text-zinc-200",
+										"h-8 px-4 rounded-[var(--radius-lg)] text-[12px] font-medium transition-all duration-200",
+										contextTab === "base" 
+											? "bg-[rgba(255,255,255,0.08)] text-[var(--text-primary)]" 
+											: "text-[var(--text-muted)] hover:text-[var(--text-primary)]",
 									].join(" ")}
 								>
 									{t(lang, "contextModal.tab.base")}
 								</button>
 							</div>
-							<Button variant="ghost" size="sm" onClick={() => void copyContext()} className="text-zinc-300">
-								{contextCopied ? t(lang, "actions.copied") : t(lang, "actions.copy")}
-							</Button>
-							<Button variant="ghost" size="icon" onClick={() => setContextOpen(false)} className="text-zinc-400 hover:text-zinc-100">
+							
+							<button 
+								onClick={() => void copyContext()} 
+								className="flex items-center gap-2 h-8 px-3 rounded-[var(--radius-lg)] text-[12px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[rgba(255,255,255,0.06)] transition-all duration-200"
+							>
+								{contextCopied ? (
+									<>
+										<Icons.check className="w-3.5 h-3.5 text-[var(--accent-green)]" />
+										{t(lang, "actions.copied")}
+									</>
+								) : (
+									<>
+										<Icons.copy className="w-3.5 h-3.5" />
+										{t(lang, "actions.copy")}
+									</>
+								)}
+							</button>
+							
+							<button 
+								onClick={() => setContextOpen(false)} 
+								className="flex items-center justify-center w-8 h-8 rounded-[10px] text-[#8A8F98] hover:text-[#F9F9FB] hover:bg-[rgba(255,255,255,0.06)] transition-all duration-200"
+							>
 								<Icons.close className="w-5 h-5" />
-							</Button>
+							</button>
 						</div>
 					</div>
 
-					<div className="flex-1 overflow-auto p-4">
+					
+					<div className="flex-1 overflow-auto p-5 scrollbar-premium">
 						{contextLoading ? (
-							<div className="text-sm text-zinc-400">{t(lang, "status.loading")}</div>
+							<div className="flex flex-col items-center justify-center py-16">
+								<div className="w-10 h-10 rounded-full border-2 border-[rgba(255,255,255,0.15)] border-t-[var(--accent-cyan)] animate-spin mb-4" />
+								<div className="text-[13px] text-[var(--text-muted)]">{t(lang, "status.loading")}</div>
+							</div>
 						) : contextError ? (
-							<div className="text-sm text-red-300 whitespace-pre-wrap">{contextError}</div>
+							<div className="flex flex-col items-center justify-center py-16">
+<div className="w-12 h-12 rounded-full bg-[var(--accent-red-glow)] flex items-center justify-center mb-4">
+										<Icons.close className="w-6 h-6 text-[var(--accent-red)]" />
+									</div>
+									<div className="text-[13px] text-[var(--accent-red)] whitespace-pre-wrap text-center max-w-md">{contextError}</div>
+							</div>
 						) : (
-							<pre className="text-xs leading-relaxed text-zinc-200 whitespace-pre-wrap break-words bg-black/20 border border-white/[0.06] rounded-xl p-4">
+							<pre className="text-[12px] leading-relaxed text-[var(--text-secondary)] whitespace-pre-wrap break-words bg-[rgba(0,0,0,0.3)] border border-[var(--glass-border)] rounded-[var(--radius-xl)] p-5 font-mono">
 								{contextTab === "withTools" ? contextWithTools : contextBase}
 							</pre>
 						)}

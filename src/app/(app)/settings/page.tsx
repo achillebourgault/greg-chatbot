@@ -31,23 +31,29 @@ function OptionCard({
 			type="button"
 			onClick={onClick}
 			className={[
-				"text-left w-full rounded-xl border p-4 transition-all duration-150",
+				"group text-left w-full rounded-[var(--radius-lg)] border p-4 transition-all duration-200",
 				selected
-					? "bg-white/[0.06] border-white/[0.18]"
-					: "bg-white/[0.03] border-white/[0.08] hover:bg-white/[0.05] hover:border-white/[0.12]",
+					? "bg-[var(--glass-bg)] border-[var(--glass-border-hover)]"
+					: "bg-[var(--glass-bg-subtle)] border-[var(--glass-border)] hover:bg-[var(--glass-bg)] hover:border-[var(--glass-border-hover)]",
 			].join(" ")}
 		>
 			<div className="flex items-start justify-between gap-3">
 				<div>
-					<div className="text-sm font-medium text-zinc-100">{title}</div>
-					<div className="text-xs text-zinc-500 mt-1 leading-relaxed">{description}</div>
+					<div
+						className={`text-sm font-medium transition-colors ${
+							selected ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]"
+						}`}
+					>
+						{title}
+					</div>
+					<div className="text-xs text-[var(--text-muted)] mt-1 leading-relaxed">{description}</div>
 				</div>
 				{selected ? (
-					<div className="mt-0.5 w-5 h-5 flex-shrink-0 rounded-full bg-zinc-100 grid place-items-center">
-						<Icons.check className="w-3 h-3 text-zinc-900" />
+					<div className="mt-0.5 w-5 h-5 flex-shrink-0 rounded-full bg-[var(--glass-bg)] border border-[var(--glass-border-hover)] grid place-items-center">
+						<Icons.check className="w-3 h-3 text-[var(--accent-cyan)]" />
 					</div>
 				) : (
-					<div className="mt-0.5 w-5 h-5 flex-shrink-0 rounded-full border border-white/[0.12]" />
+					<div className="mt-0.5 w-5 h-5 flex-shrink-0 rounded-full border border-[var(--glass-border)] group-hover:border-[var(--glass-border-hover)] transition-colors" />
 				)}
 			</div>
 		</button>
@@ -142,77 +148,89 @@ export default function SettingsRoute() {
 	};
 
 	return (
-		<div className="h-full w-full overflow-auto">
-			<header className="sticky top-0 z-10 flex items-center justify-between gap-3 px-5 py-3 border-b border-white/[0.06] bg-zinc-950/80 backdrop-blur">
-				<div className="flex items-center gap-3">
-					<Button
-						variant="ghost"
-						size="icon"
+		<div className="h-full w-full overflow-auto scrollbar-premium">
+			
+			<header className="sticky top-0 z-10 flex items-center justify-between gap-3 px-6 py-4 border-b border-[var(--glass-border)] bg-[var(--glass-bg-strong)] backdrop-blur-xl">
+				<div className="flex items-center gap-4">
+					<button
 						onClick={() => router.push("/")}
-						className="text-zinc-400 hover:text-zinc-100"
+						className="w-10 h-10 rounded-[var(--radius-lg)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--glass-bg)] transition-all duration-200"
 						title={t(lang, "actions.back")}
 					>
-						<Icons.arrowLeft className="w-4 h-4" />
-					</Button>
-					<div>
-						<div className="text-sm font-semibold text-zinc-100">{t(lang, "settings.title")}</div>
-						<div className="text-[11px] text-zinc-500">{t(lang, "settings.subtitle")}</div>
+						<Icons.arrowLeft className="w-5 h-5" />
+					</button>
+					<div className="flex items-center gap-3">
+						<div className="w-10 h-10 rounded-[var(--radius-lg)] bg-[var(--glass-bg-subtle)] border border-[var(--glass-border)] flex items-center justify-center">
+							<Icons.settings className="w-5 h-5 text-[var(--text-primary)]" />
+						</div>
+						<div>
+							<div className="text-base font-bold text-[var(--text-primary)]">{t(lang, "settings.title")}</div>
+							<div className="text-xs text-[var(--text-muted)]">{t(lang, "settings.subtitle")}</div>
+						</div>
 					</div>
 				</div>
 
-				<div className="flex items-center gap-2">
+				<div className="flex items-center gap-3">
 					{loading ? (
-						<div className="flex items-center gap-2 text-[11px] text-zinc-500">
+						<div className="flex items-center gap-2 px-3 py-1.5 rounded-[var(--radius-md)] bg-[var(--glass-bg)] text-xs text-[var(--text-tertiary)]">
 							<Spinner size="sm" />
 							<span>{t(lang, "status.loading")}</span>
 						</div>
 					) : saved ? (
-						<div className="text-[11px] text-emerald-300">{t(lang, "status.saved.short")}</div>
+						<div className="flex items-center gap-2 px-3 py-1.5 rounded-[var(--radius-md)] bg-[var(--glass-bg)] border border-[var(--glass-border)] text-xs text-[var(--text-secondary)] font-medium animate-fade-up">
+							<Icons.check className="w-3.5 h-3.5" />
+							{t(lang, "status.saved.short")}
+						</div>
 					) : null}
-					<Button variant="secondary" onClick={handleSave} disabled={loading}>
+					<Button variant="primary" onClick={handleSave} disabled={loading}>
 						{t(lang, "settings.save")}
 					</Button>
 				</div>
 			</header>
 
-			<div className="px-5 py-5">
-				<div className="w-full space-y-4">
+			<div className="px-6 py-6">
+				<div className="w-full space-y-6">
 					{error ? (
-						<div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+						<div className="rounded-[var(--radius-xl)] border border-[var(--accent-red)]/30 bg-[var(--accent-red)]/10 px-5 py-4 text-sm text-[var(--text-primary)] flex items-center gap-3">
+							<div className="w-10 h-10 rounded-[var(--radius-lg)] bg-[var(--accent-red)]/20 flex items-center justify-center flex-shrink-0">
+								<Icons.close className="w-5 h-5 text-[var(--accent-red)]" />
+							</div>
 							{error}
 						</div>
 					) : null}
 
 					<div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-						<section className="rounded-2xl bg-white/[0.02] border border-white/[0.08] overflow-hidden">
-							<div className="px-5 py-4 border-b border-white/[0.06]">
-								<div className="text-sm font-semibold text-zinc-100">
+						
+						<section className="rounded-[var(--radius-xl)] glass overflow-hidden">
+							<div className="px-6 py-5 border-b border-[var(--glass-border)] bg-[var(--glass-bg-subtle)]">
+								<div className="text-base font-bold text-[var(--text-primary)]">
 									{t(lang, "settings.profile.title")}
 								</div>
-								<div className="text-xs text-zinc-500 mt-1">
+								<div className="text-sm text-[var(--text-muted)] mt-1">
 									{t(lang, "settings.profile.subtitle")}
 								</div>
 							</div>
-							<div className="p-5 space-y-5">
-								<div className="rounded-xl bg-white/[0.02] border border-white/[0.06] p-4">
+							<div className="p-6 space-y-6">
+								
+								<div className="rounded-[var(--radius-lg)] bg-[var(--glass-bg-subtle)] border border-[var(--glass-border)] p-5">
 									<div className="flex items-start justify-between gap-4">
 										<div>
-											<div className="text-sm font-semibold text-zinc-100">{t(lang, "settings.language")}</div>
-											<div className="text-xs text-zinc-500 mt-1">
+											<div className="text-sm font-semibold text-[var(--text-primary)]">{t(lang, "settings.language")}</div>
+											<div className="text-xs text-[var(--text-muted)] mt-1">
 												{t(lang, "settings.language.help")}
 											</div>
 										</div>
-										<div className="flex items-center gap-1">
+										<div className="flex items-center p-0.5 rounded-[var(--radius-md)] bg-[var(--glass-bg)] border border-[var(--glass-border)]">
 											{UI_LANGUAGES.map((l) => (
 												<button
 													key={l}
 													type="button"
 													onClick={() => updateSettings({ uiLanguage: l })}
 													className={[
-														"h-8 px-3 rounded-lg text-[11px] border transition-colors",
+														"h-8 px-4 rounded-[var(--radius-sm)] text-xs font-semibold transition-all duration-200",
 														lang === l
-															? "bg-white/[0.12] border-white/[0.20] text-zinc-100"
-															: "bg-transparent border-white/[0.08] text-zinc-400 hover:bg-white/[0.06] hover:text-zinc-200",
+															? "bg-[var(--glass-bg)] text-[var(--text-primary)]"
+															: "text-[var(--text-tertiary)] hover:text-[var(--text-primary)]",
 													].join(" ")}
 												>
 													{l.toUpperCase()}
@@ -222,24 +240,25 @@ export default function SettingsRoute() {
 									</div>
 								</div>
 
+								
 								<div className="flex items-center justify-between gap-3">
 									<div>
-										<div className="text-sm font-semibold text-zinc-100">{t(lang, "settings.personality")}</div>
-										<div className="text-xs text-zinc-500 mt-1">{t(lang, "settings.personality.help")}</div>
+										<div className="text-base font-bold text-[var(--text-primary)]">{t(lang, "settings.personality")}</div>
+										<div className="text-sm text-[var(--text-muted)] mt-1">{t(lang, "settings.personality.help")}</div>
 									</div>
-									<Button
-										variant="ghost"
+									<button
 										onClick={() => setPersonalityAndStore(DEFAULT_PERSONALITY)}
 										disabled={loading}
-										className="text-zinc-300 hover:text-zinc-100"
+										className="px-3 py-1.5 rounded-[var(--radius-md)] text-xs font-medium text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--glass-bg)] transition-all duration-200"
 									>
 										{t(lang, "actions.restore")}
-									</Button>
+									</button>
 								</div>
 
-								<div className="space-y-2">
-									<div className="text-xs font-medium text-zinc-300">{t(lang, "settings.tone")}</div>
-									<div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+								
+								<div className="space-y-3">
+									<div className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">{t(lang, "settings.tone")}</div>
+									<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 										{toneOptions.map((opt) => (
 											<OptionCard
 												key={opt.id}
@@ -252,9 +271,10 @@ export default function SettingsRoute() {
 									</div>
 								</div>
 
-								<div className="space-y-2">
-									<div className="text-xs font-medium text-zinc-300">{t(lang, "settings.verbosity")}</div>
-									<div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+								
+								<div className="space-y-3">
+									<div className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">{t(lang, "settings.verbosity")}</div>
+									<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 										{verbosityOptions.map((opt) => (
 											<OptionCard
 												key={opt.id}
@@ -267,9 +287,10 @@ export default function SettingsRoute() {
 									</div>
 								</div>
 
-								<div className="space-y-2">
-									<div className="text-xs font-medium text-zinc-300">{t(lang, "settings.guidance")}</div>
-									<div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+								
+								<div className="space-y-3">
+									<div className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">{t(lang, "settings.guidance")}</div>
+									<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 										{guidanceOptions.map((opt) => (
 											<OptionCard
 												key={opt.id}
@@ -282,9 +303,10 @@ export default function SettingsRoute() {
 									</div>
 								</div>
 
-								<div className="space-y-2">
-									<div className="text-xs font-medium text-zinc-300">{t(lang, "settings.playfulness")}</div>
-									<div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+								
+								<div className="space-y-3">
+									<div className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">{t(lang, "settings.playfulness")}</div>
+									<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 										{playfulnessOptions.map((opt) => (
 											<OptionCard
 												key={opt.id}
@@ -299,60 +321,73 @@ export default function SettingsRoute() {
 							</div>
 						</section>
 
-						<section className="rounded-2xl bg-white/[0.02] border border-white/[0.08] overflow-hidden">
-							<div className="px-5 py-4 border-b border-white/[0.06]">
-								<div className="text-sm font-semibold text-zinc-100">{t(lang, "settings.instructions")}</div>
-								<div className="text-xs text-zinc-500 mt-1">{t(lang, "settings.instructions.help")}</div>
+						
+						<section className="rounded-[var(--radius-xl)] glass overflow-hidden">
+							<div className="px-6 py-5 border-b border-[var(--glass-border)] bg-[var(--glass-bg-subtle)]">
+								<div className="text-base font-bold text-[var(--text-primary)]">{t(lang, "settings.instructions")}</div>
+								<div className="text-sm text-[var(--text-muted)] mt-1">{t(lang, "settings.instructions.help")}</div>
 							</div>
 
-							<div className="p-5 space-y-4">
-								<div className="rounded-xl bg-white/[0.02] border border-white/[0.06] p-4">
+							<div className="p-6 space-y-5">
+								
+								<div className="rounded-[var(--radius-lg)] bg-[var(--glass-bg-subtle)] border border-[var(--glass-border)] p-5">
 									<div className="flex items-start justify-between gap-4">
-										<div className="text-sm font-semibold text-zinc-100">{t(lang, "settings.instructions.editorTitle")}</div>
-										<div className="text-[10px] text-zinc-500">{customInstructions.length}/5000</div>
+										<div className="text-sm font-semibold text-[var(--text-primary)]">{t(lang, "settings.instructions.editorTitle")}</div>
+										<div className="text-[10px] text-[var(--text-muted)] px-2 py-1 rounded-[var(--radius-sm)] bg-[var(--glass-bg)] border border-[var(--glass-border)]">
+											{customInstructions.length}/5000
+										</div>
 									</div>
-									<div className="mt-3">
+									<div className="mt-4">
 										<TextArea
 											value={customInstructions}
 											onChange={(e) => setCustomInstructions(e.target.value.slice(0, 5000))}
 											rows={12}
 											placeholder={t(lang, "settings.instructions.placeholder.page")}
+											className="font-mono text-xs"
 										/>
 									</div>
 
-									<div className="mt-3 flex items-center justify-between gap-2">
-										<Button
-											variant="ghost"
+									<div className="mt-4 flex items-center justify-between gap-2">
+										<button
 											onClick={handleClearInstructions}
 											disabled={loading}
-											className="text-zinc-300 hover:text-zinc-100"
+											className="px-3 py-1.5 rounded-[var(--radius-md)] text-xs font-medium text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--glass-bg)] transition-all duration-200"
 										>
 											{t(lang, "settings.reset")}
-										</Button>
-										<div className="text-[11px] text-zinc-500">
+										</button>
+										<div className="text-[11px] text-[var(--text-muted)]">
 											{t(lang, "settings.instructions.reminderSave")}
 										</div>
 									</div>
 								</div>
 
-								<div className="rounded-xl bg-white/[0.02] border border-white/[0.06] p-4">
+								
+								<div className="rounded-[var(--radius-lg)] bg-[var(--accent-red-glow)] border border-[var(--glass-border)] ring-1 ring-[var(--accent-red)] ring-opacity-20 p-5">
 									<div>
-										<div className="text-sm font-semibold text-zinc-100">{t(lang, "settings.data.title")}</div>
-										<div className="text-xs text-zinc-500 mt-1">{t(lang, "settings.data.subtitle")}</div>
+										<div className="text-sm font-semibold text-[var(--text-primary)]">{t(lang, "settings.data.title")}</div>
+										<div className="text-xs text-[var(--text-muted)] mt-1">{t(lang, "settings.data.subtitle")}</div>
 									</div>
-									<div className="mt-3 text-xs text-zinc-500">{t(lang, "settings.archiveAll.help")}</div>
-									<div className="mt-3 flex items-center justify-between gap-3">
+									<div className="mt-3 text-xs text-[var(--text-muted)]">{t(lang, "settings.archiveAll.help")}</div>
+									<div className="mt-4 flex items-center justify-between gap-3">
 										<Button variant="danger" onClick={() => setConfirmArchiveAllOpen(true)} disabled={loading}>
+											<Icons.trash className="w-4 h-4" />
 											{t(lang, "actions.deleteAll")}
 										</Button>
-										<div className="text-[11px] text-zinc-500">{t(lang, "settings.data.archiveHint")}</div>
+										<div className="text-[11px] text-[var(--text-muted)]">{t(lang, "settings.data.archiveHint")}</div>
 									</div>
 
 									{confirmArchiveAllOpen ? (
-										<div className="mt-3 rounded-xl border border-red-500/30 bg-red-500/10 p-3">
-											<div className="text-sm text-red-100 font-medium">{t(lang, "settings.archiveAll.confirmTitle")}</div>
-											<div className="text-xs text-red-200/80 mt-1">{t(lang, "settings.archiveAll.confirmBody")}</div>
-											<div className="mt-3 flex items-center gap-2">
+										<div className="mt-4 rounded-[var(--radius-lg)] border border-[var(--glass-border)] bg-[var(--accent-red-glow)] ring-1 ring-[var(--accent-red)] ring-opacity-30 p-4">
+											<div className="flex items-start gap-3">
+												<div className="w-10 h-10 rounded-[var(--radius-lg)] bg-[var(--accent-red-glow)] border border-[var(--glass-border)] flex items-center justify-center flex-shrink-0">
+													<Icons.trash className="w-5 h-5 text-[var(--accent-red)]" />
+												</div>
+												<div>
+													<div className="text-sm text-[var(--text-primary)] font-semibold">{t(lang, "settings.archiveAll.confirmTitle")}</div>
+													<div className="text-xs text-[var(--text-secondary)] mt-1">{t(lang, "settings.archiveAll.confirmBody")}</div>
+												</div>
+											</div>
+											<div className="mt-4 flex items-center gap-2">
 												<Button variant="secondary" onClick={() => setConfirmArchiveAllOpen(false)}>
 													{t(lang, "actions.cancel")}
 												</Button>

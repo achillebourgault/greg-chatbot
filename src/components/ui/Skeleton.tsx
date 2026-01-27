@@ -17,7 +17,7 @@ export function Skeleton({
 	height,
 	lines = 1,
 }: SkeletonProps) {
-	const baseClasses = "animate-pulse bg-white/[0.06]";
+	const baseClasses = "animate-pulse bg-[var(--glass-bg)]";
 	
 	const variantClasses = {
 		text: "h-4 rounded",

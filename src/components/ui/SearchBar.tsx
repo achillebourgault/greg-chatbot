@@ -19,27 +19,26 @@ export function SearchBar({ value, onChange, placeholder, className = "" }: Sear
 			onClick={() => inputRef.current?.focus()}
 		>
 			<div className={`
-				relative flex items-center gap-3 rounded-xl px-3.5 py-2
-				bg-white/[0.03]
-				border border-white/[0.06] 
-				transition-all duration-150
+				relative flex items-center gap-3 rounded-[var(--radius-lg)] px-4 py-3
+				bg-[rgba(255,255,255,0.02)]
+				border transition-all duration-200 ease-out
 				${isFocused 
-					? "border-white/[0.15] bg-white/[0.05]" 
-					: "hover:border-white/[0.1] hover:bg-white/[0.04]"
+					? "border-[var(--accent-cyan)]/40 bg-[rgba(255,255,255,0.04)] shadow-[0_0_0_3px_var(--accent-cyan-glow)]" 
+					: "border-[var(--glass-border)] hover:border-[var(--glass-border-hover)] hover:bg-[rgba(255,255,255,0.03)]"
 				}
 			`}>
+				
 				<svg 
-					className={`w-4 h-4 transition-colors duration-150 ${isFocused ? "text-zinc-300" : "text-zinc-500"}`}
+					className={`w-4 h-4 transition-all duration-200 flex-shrink-0 ${
+						isFocused ? "text-[var(--accent-cyan)]" : "text-[var(--text-subtle)]"
+					}`}
 					fill="none" 
 					viewBox="0 0 24 24" 
 					stroke="currentColor"
+					strokeWidth={2}
 				>
-					<path 
-						strokeLinecap="round" 
-						strokeLinejoin="round" 
-						strokeWidth={2} 
-						d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" 
-					/>
+					<circle cx="11" cy="11" r="7" />
+					<path strokeLinecap="round" d="M21 21l-4.35-4.35" />
 				</svg>
 				
 				<input
@@ -50,7 +49,7 @@ export function SearchBar({ value, onChange, placeholder, className = "" }: Sear
 					onFocus={() => setIsFocused(true)}
 					onBlur={() => setIsFocused(false)}
 					placeholder={placeholder ?? ""}
-					className="flex-1 bg-transparent text-sm text-zinc-100 placeholder-zinc-500 outline-none"
+					className="flex-1 bg-transparent text-[14px] text-[var(--text-primary)] placeholder-[var(--text-subtle)] outline-none min-w-0"
 				/>
 				
 				{value && (
@@ -60,10 +59,10 @@ export function SearchBar({ value, onChange, placeholder, className = "" }: Sear
 							onChange("");
 							inputRef.current?.focus();
 						}}
-						className="p-1 rounded-full hover:bg-white/10 transition-colors"
+						className="p-1.5 rounded-[var(--radius-sm)] hover:bg-[rgba(255,255,255,0.08)] transition-all duration-200 flex-shrink-0 text-[var(--text-subtle)] hover:text-[var(--text-primary)]"
 					>
-						<svg className="w-3.5 h-3.5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+						<svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+							<path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
 						</svg>
 					</button>
 				)}

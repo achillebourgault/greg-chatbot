@@ -33,14 +33,14 @@ function CopyButton({ content, title }: { content: string; title: string }) {
 		<Button
 			variant="ghost"
 			size="icon"
-			className="w-7 h-7 opacity-0 group-hover:opacity-100 transition-opacity"
+			className="w-7 h-7 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[rgba(255,255,255,0.06)]"
 			onClick={handleCopy}
 			title={title}
 		>
 			{copied ? (
-				<Icons.check className="w-3.5 h-3.5 text-zinc-300" />
+				<Icons.check className="w-3.5 h-3.5 text-[#34C759]" />
 			) : (
-				<Icons.copy className="w-3.5 h-3.5 text-zinc-500" />
+				<Icons.copy className="w-3.5 h-3.5 text-[#8A8F98]" />
 			)}
 		</Button>
 	);
@@ -52,12 +52,12 @@ function RestartFromHereButton({ onClick, title, disabled }: { onClick: () => vo
 		<Button
 			variant="ghost"
 			size="icon"
-			className="w-7 h-7 opacity-0 group-hover:opacity-100 transition-opacity"
+			className="w-7 h-7 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[rgba(255,255,255,0.06)]"
 			onClick={onClick}
 			title={title}
 			disabled={disabled}
 		>
-			<Icons.arrowLeft className="w-3.5 h-3.5 text-zinc-500" />
+			<Icons.arrowLeft className="w-3.5 h-3.5 text-[#8A8F98]" />
 		</Button>
 	);
 }
@@ -423,82 +423,80 @@ function Bubble({ message, showModelFooter, copyTitle, restartTitle, onRestartFr
 	}, [showProgress, showToolProgress, hasAssistantContent, message.id]);
 
 	const authorLabel = isUser ? t(lang, "thread.you") : t(lang, "app.name");
-	const roleIcon = isUser ? <Icons.user className="w-5 h-5 text-zinc-300" /> : <Icons.greg className="w-6 h-6" />;
 
 	return (
-		<div className="group animate-in fade-in slide-in-from-bottom-2 duration-300">
-			<div className="flex gap-4">
-				<div className="flex-shrink-0 pt-0.5">
-					<div className="w-8 h-8 rounded-full bg-white/[0.03] border border-white/[0.08] flex items-center justify-center">
-						{roleIcon}
+		<div className="group animate-fade-up">
+			<div className="py-7">
+				
+				
+				<div className="relative flex items-start justify-between gap-3 mb-3">
+					<div className="min-w-0 flex flex-col items-start">
+						<div className="flex items-center gap-2.5">
+							<span className="text-[14px] font-semibold text-[var(--text-primary)]">{authorLabel}</span>
+							{!isUser && showModelFooter ? (
+								<span className="px-2 py-0.5 rounded-[8px] bg-[var(--accent-cyan-glow)] border border-[rgba(0,212,255,0.15)] text-[10px] text-[var(--accent-cyan)]/80 font-medium uppercase tracking-wide">
+									{getModelDisplayName(message.model ?? "")}
+								</span>
+							) : null}
+						</div>
+						{time ? <span className="text-[11px] text-[var(--text-subtle)] mt-0.5">{time}</span> : null}
+					</div>
+
+					
+					<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
+						{onRestartFromHere ? (
+							<RestartFromHereButton onClick={onRestartFromHere} title={restartTitle} disabled={disableRestart} />
+						) : null}
+						{!isUser && showContinue && onContinue ? (
+							<Button
+								variant="secondary"
+								size="xs"
+								onClick={onContinue}
+								disabled={continueDisabled}
+								title={continueTitle}
+								className="text-[11px]"
+							>
+								{continueLabel}
+							</Button>
+						) : null}
+						{cleanContent ? <CopyButton content={cleanContent} title={copyTitle} /> : null}
 					</div>
 				</div>
 
-				<div className="min-w-0 flex-1">
-					<div className="flex items-start justify-between gap-3">
-						<div className="min-w-0">
-							<div className="flex items-center gap-2">
-								<div className={`text-[13px] font-semibold truncate ${isUser ? "text-zinc-200" : "text-zinc-100"}`}>
-									{authorLabel}
-								</div>
-								{time ? <div className="text-[12px] text-zinc-600">{time}</div> : null}
-								{!isUser && showModelFooter ? (
-									<div className="text-[12px] text-zinc-600 truncate">• {getModelDisplayName(message.model ?? "")}</div>
-								) : null}
-							</div>
+				
+				<div className="relative">
+					{showDinoLoader ? (
+						<div className={loaderOnly ? "" : "mb-5"}>
+							<DinoLoader subtitle={dinoSubtitle} tokens={approxTokens} />
 						</div>
+					) : null}
 
-						<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-							{onRestartFromHere ? (
-								<RestartFromHereButton onClick={onRestartFromHere} title={restartTitle} disabled={disableRestart} />
-							) : null}
-							{!isUser && showContinue && onContinue ? (
-								<Button
-									variant="secondary"
-									size="xs"
-									onClick={onContinue}
-									disabled={continueDisabled}
-									title={continueTitle}
-								>
-									{continueLabel}
-								</Button>
-							) : null}
-							{cleanContent ? <CopyButton content={cleanContent} title={copyTitle} /> : null}
+					{cleanContent.trim().length ? (
+						<div className="text-[15px] leading-[1.8] text-[var(--text-secondary)]">
+							{isUser ? (
+								<Markdown content={cleanContent} lang={lang} />
+							) : (
+								<>
+									{inlineSources.before.trim().length ? <Markdown content={inlineSources.before} lang={lang} /> : null}
+									{inlineSources.after.trim().length ? <Markdown content={inlineSources.after} lang={lang} /> : null}
+								</>
+							)}
 						</div>
-					</div>
+					) : null}
 
-					<div className="mt-2 text-[15px] leading-7 text-zinc-100">
-						{showDinoLoader ? (
-							<div className={loaderOnly ? "" : "mb-4"}>
-								<DinoLoader subtitle={dinoSubtitle} tokens={approxTokens} />
-							</div>
-						) : null}
-
-						{cleanContent.trim().length ? (
-							<>
-								{isUser ? (
-									<Markdown content={cleanContent} lang={lang} />
-								) : (
-									<>
-										{inlineSources.before.trim().length ? <Markdown content={inlineSources.before} lang={lang} /> : null}
-										{inlineSources.after.trim().length ? <Markdown content={inlineSources.after} lang={lang} /> : null}
-									</>
-								)}
-							</>
-						) : null}
-
-						{!isUser && sourcesForCards.length ? (
+					{!isUser && sourcesForCards.length ? (
+						<div className="mt-5">
 							<SourceCards key={message.id} urls={sourcesForCards} lang={lang} maxInitial={3} />
-						) : null}
+						</div>
+					) : null}
 
-						{showProgress && showSkeleton ? (
-							<div className={`mt-3 ${isComplexProgress ? "w-[320px]" : "w-[220px]"} space-y-2`}>
-								<Skeleton variant="text" width={isComplexProgress ? "92%" : "55%"} height={10} />
-								{isComplexProgress ? <Skeleton variant="text" width="76%" height={10} /> : null}
-								{isComplexProgress ? <Skeleton variant="text" width="64%" height={10} /> : null}
-							</div>
-						) : null}
-					</div>
+					{showProgress && showSkeleton ? (
+						<div className={`mt-5 ${isComplexProgress ? "w-[320px]" : "w-[220px]"} space-y-3`}>
+							<Skeleton variant="text" width={isComplexProgress ? "92%" : "55%"} height={10} />
+							{isComplexProgress ? <Skeleton variant="text" width="76%" height={10} /> : null}
+							{isComplexProgress ? <Skeleton variant="text" width="64%" height={10} /> : null}
+						</div>
+					) : null}
 				</div>
 			</div>
 		</div>
@@ -516,23 +514,35 @@ function WelcomeMessage() {
 	];
 
 	return (
-		<div className="flex flex-col items-center justify-center py-16 px-4 animate-in fade-in duration-500">
-			<div className="relative mb-6">
-				<Icons.greg className="w-20 h-20" />
+		<div className="flex flex-col items-center justify-center py-24 px-4 animate-fade-in">
+			
+			<div className="relative mb-10">
+				<div className="w-28 h-28 rounded-[24px] glass-strong flex items-center justify-center shadow-[var(--shadow-lg)]">
+					<Icons.greg className="w-16 h-16" />
+				</div>
+				
+				<div className="absolute inset-0 rounded-[24px] bg-gradient-to-b from-[var(--accent-cyan)]/10 to-transparent opacity-50 blur-xl -z-10" />
 			</div>
 
-			<h2 className="text-2xl font-semibold text-zinc-100 mb-2">{t(lang, "thread.welcome.title")}</h2>
+			
+			<h2 className="text-[32px] font-bold text-[var(--text-primary)] mb-3 tracking-tight">
+				{t(lang, "thread.welcome.title")}
+			</h2>
 
-			<p className="text-zinc-400 text-center max-w-md mb-8">{t(lang, "thread.welcome.subtitle")}</p>
+			
+			<p className="text-[var(--text-muted)] text-center max-w-md mb-12 text-[15px] leading-relaxed">
+				{t(lang, "thread.welcome.subtitle")}
+			</p>
 
-			<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg w-full">
+			
+			<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl w-full">
 				{suggestions.map((suggestion, i) => (
 					<div
 						key={i}
-						className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04] transition-all cursor-pointer group"
+						className="group relative flex items-center gap-4 px-5 py-4 rounded-[var(--radius-xl)] border border-[var(--glass-border)] bg-[var(--glass-bg)] hover:bg-[rgba(255,255,255,0.03)] hover:border-[var(--glass-border-hover)] transition-all duration-200 cursor-pointer card-interactive"
 					>
-						<span className="text-lg">{suggestion.icon}</span>
-						<span className="text-sm text-zinc-400 group-hover:text-zinc-300 transition-colors">
+						<span className="text-[24px]">{suggestion.icon}</span>
+						<span className="text-[13px] text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors font-medium">
 							{suggestion.text}
 						</span>
 					</div>
@@ -628,13 +638,13 @@ export function ChatThread({ briefStatusText, detailedStatusText, continueMessag
 	return (
 		<div
 			ref={containerRef}
-			className={`flex-1 overflow-auto px-4 ${state.isStreaming ? "pt-5" : "pt-7"} pb-32 sm:pb-36 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20`}
+			className={`flex-1 overflow-auto px-5 ${state.isStreaming ? "pt-6" : "pt-10"} pb-36 sm:pb-40 scrollbar-premium`}
 		>
 			<div className="mx-auto w-full max-w-3xl">
 				{messages.length === 0 ? (
 					<WelcomeMessage />
 				) : (
-					<div className="flex flex-col gap-10">
+					<div className="flex flex-col divide-y divide-[var(--divider)]">
 						{messages.map((message, index) => {
 							const isLastAssistant =
 								message.role === "assistant" &&
@@ -689,18 +699,24 @@ export function ChatThread({ briefStatusText, detailedStatusText, continueMessag
 				<div ref={anchorRef} className="h-4" />
 			</div>
 
+			
 			{showFollowButton ? (
-				<div className="fixed right-4 sm:right-6 bottom-28 sm:bottom-32 z-40">
-					<Button
-						variant="secondary"
-						size="icon"
+				<div className="fixed right-6 sm:right-8 bottom-32 sm:bottom-36 z-40">
+					<button
 						onClick={handleFollowClick}
 						title={t(lang, "thread.followOutput")}
 						aria-label={t(lang, "thread.followOutput")}
-						className={`shadow-[0_12px_40px_rgba(0,0,0,0.45)] backdrop-blur ${isNearBottom ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+						className={`
+							h-11 w-11 rounded-[var(--radius-xl)] flex items-center justify-center
+							glass-strong
+							transition-all duration-200
+							hover:bg-[rgba(30,30,36,0.95)] hover:border-[rgba(0,212,255,0.25)]
+							active:scale-95 shadow-[var(--shadow-lg)]
+							${isNearBottom ? "opacity-0 pointer-events-none translate-y-4" : "opacity-100 translate-y-0"}
+						`}
 					>
-						<Icons.arrowDown className="w-4 h-4" />
-					</Button>
+						<Icons.arrowDown className="w-5 h-5 text-[var(--text-primary)]" />
+					</button>
 				</div>
 			) : null}
 		</div>

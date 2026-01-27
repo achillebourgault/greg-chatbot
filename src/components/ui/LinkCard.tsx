@@ -366,13 +366,13 @@ export function LinkCard({ href }: { href: string }) {
 			rel="noreferrer"
 			className="block no-underline"
 		>
-			<div className="overflow-hidden rounded-xl border border-white/[0.10] bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
+			<div className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--glass-border)] bg-[var(--glass-bg-subtle)] hover:bg-[var(--glass-bg)] transition-colors">
 				<div className="flex gap-3 p-3 items-start">
 					<div className="flex-1 min-w-0">
-						<div className="text-[11px] text-zinc-500 truncate">
+						<div className="text-[11px] text-[var(--text-muted)] truncate">
 							{kindLabel} • {displayHost(href)}
 						</div>
-						<div className="mt-1 text-[13px] text-zinc-100 font-medium leading-snug">
+						<div className="mt-1 text-[13px] text-[var(--text-primary)] font-medium leading-snug">
 							<span className="block truncate">{title}</span>
 						</div>
 						{chips.length ? (
@@ -380,24 +380,24 @@ export function LinkCard({ href }: { href: string }) {
 								{chips.map((c, idx) => (
 									<span
 										key={`${c}-${idx}`}
-										className="px-2 py-0.5 rounded-full border border-white/[0.08] bg-white/[0.03] text-[11px] text-zinc-300"
+										className="px-2 py-0.5 rounded-full border border-[var(--glass-border)] bg-[var(--glass-bg-subtle)] text-[11px] text-[var(--text-secondary)]"
 									>
 										{c}
 									</span>
 								))}
 							</div>
 						) : null}
-						{detailLine ? <div className="mt-1 text-[12px] text-zinc-500 truncate">{detailLine}</div> : null}
+						{detailLine ? <div className="mt-1 text-[12px] text-[var(--text-muted)] truncate">{detailLine}</div> : null}
 						{error ? (
 							<div className="mt-1 text-[12px] text-red-300/80 truncate">{errorLabel}</div>
 						) : data ? (
 							description ? (
-								<div className="mt-1 text-[12px] text-zinc-400">
+								<div className="mt-1 text-[12px] text-[var(--text-tertiary)]">
 									<span className="block truncate">{description}</span>
 								</div>
 							) : null
 						) : (
-							<div className="mt-2 flex items-center gap-2 text-[12px] text-zinc-500">
+							<div className="mt-2 flex items-center gap-2 text-[12px] text-[var(--text-muted)]">
 								<Spinner size="sm" />
 								<span>{loadingLabel}</span>
 							</div>
@@ -407,7 +407,7 @@ export function LinkCard({ href }: { href: string }) {
 					<div className="flex-shrink-0">
 						{showLargeThumb ? (
 							<div
-								className={`${largeThumbClass} overflow-hidden rounded-lg bg-white/[0.04] border border-white/[0.06]`}
+								className={`${largeThumbClass} overflow-hidden rounded-[var(--radius-md)] bg-[var(--glass-bg)] border border-[var(--glass-border)]`}
 							>
 								{!iconError && imgUrl ? (
 									// eslint-disable-next-line @next/next/no-img-element
@@ -421,13 +421,13 @@ export function LinkCard({ href }: { href: string }) {
 										}}
 									/>
 								) : (
-									<div className="h-full w-full flex items-center justify-center text-zinc-600 text-[11px]">
+									<div className="h-full w-full flex items-center justify-center text-[var(--text-muted)] text-[11px]">
 										{kind === "video" ? "VID" : ""}
 									</div>
 								)}
 							</div>
 						) : (
-							<div className="h-10 w-10 overflow-hidden rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center">
+							<div className="h-10 w-10 overflow-hidden rounded-[var(--radius-md)] bg-[var(--glass-bg)] border border-[var(--glass-border)] flex items-center justify-center">
 								{!iconError && imgUrl ? (
 									// eslint-disable-next-line @next/next/no-img-element
 									<img
@@ -440,7 +440,7 @@ export function LinkCard({ href }: { href: string }) {
 									}}
 									/>
 								) : (
-									<div className="text-zinc-600 text-[11px]">{kind === "video" ? "VID" : ""}</div>
+									<div className="text-[var(--text-muted)] text-[11px]">{kind === "video" ? "VID" : ""}</div>
 								)}
 							</div>
 						)}

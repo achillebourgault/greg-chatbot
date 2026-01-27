@@ -2,20 +2,13 @@
 
 import React from "react";
 
-// Icons SVG pour l'interface
+// Premium Icons SVG
 export const Icons = {
 	greg: (props: React.SVGProps<SVGSVGElement>) => (
 		<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-			<defs>
-				<linearGradient id="gregGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-					<stop offset="0%" stopColor="#10b981" />
-					<stop offset="50%" stopColor="#06b6d4" />
-					<stop offset="100%" stopColor="#10b981" />
-				</linearGradient>
-			</defs>
-			<circle cx="20" cy="20" r="18" fill="url(#gregGradient)" opacity="0.15" />
-			<circle cx="20" cy="20" r="16" stroke="url(#gregGradient)" strokeWidth="1.5" fill="none" />
-			<text x="20" y="26" textAnchor="middle" fill="url(#gregGradient)" fontSize="16" fontWeight="bold" fontFamily="system-ui">
+			<circle cx="20" cy="20" r="18" fill="currentColor" opacity="0.08" />
+			<circle cx="20" cy="20" r="16" stroke="currentColor" opacity="0.55" strokeWidth="1.5" fill="none" />
+			<text x="20" y="26" textAnchor="middle" fill="currentColor" fontSize="16" fontWeight="bold" fontFamily="system-ui">
 				G
 			</text>
 		</svg>
@@ -30,14 +23,13 @@ export const Icons = {
 
 	send: (props: React.SVGProps<SVGSVGElement>) => (
 		<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-			<path d="M22 2L11 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-			<path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+			<path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
 		</svg>
 	),
 
 	stop: (props: React.SVGProps<SVGSVGElement>) => (
 		<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-			<rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" />
+			<rect x="6" y="6" width="12" height="12" rx="3" fill="currentColor" />
 		</svg>
 	),
 
@@ -49,14 +41,15 @@ export const Icons = {
 
 	settings: (props: React.SVGProps<SVGSVGElement>) => (
 		<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+			<path d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z" stroke="currentColor" strokeWidth="2" />
 			<circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" />
-			<path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
 		</svg>
 	),
 
 	trash: (props: React.SVGProps<SVGSVGElement>) => (
 		<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
 			<path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+			<path d="M10 11v6M14 11v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
 		</svg>
 	),
 
@@ -69,7 +62,7 @@ export const Icons = {
 
 	menu: (props: React.SVGProps<SVGSVGElement>) => (
 		<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-			<path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+			<path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
 		</svg>
 	),
 
@@ -87,15 +80,14 @@ export const Icons = {
 
 	chat: (props: React.SVGProps<SVGSVGElement>) => (
 		<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-			<path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+			<path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
 		</svg>
 	),
 
 	sparkles: (props: React.SVGProps<SVGSVGElement>) => (
 		<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-			<path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z" fill="currentColor" />
-			<path d="M19 13l1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3z" fill="currentColor" />
-			<path d="M5 17l.5 1.5L7 19l-1.5.5L5 21l-.5-1.5L3 19l1.5-.5L5 17z" fill="currentColor" />
+			<path d="M12 3v2m0 14v2M5.6 5.6l1.4 1.4m10 10l1.4 1.4M3 12h2m14 0h2M5.6 18.4l1.4-1.4m10-10l1.4-1.4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+			<path d="M12 8l1.5 3.5L17 13l-3.5 1.5L12 18l-1.5-3.5L7 13l3.5-1.5L12 8z" fill="currentColor" />
 		</svg>
 	),
 
@@ -108,7 +100,7 @@ export const Icons = {
 
 	check: (props: React.SVGProps<SVGSVGElement>) => (
 		<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-			<path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+			<path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
 		</svg>
 	),
 
@@ -120,8 +112,59 @@ export const Icons = {
 
 	arrowDown: (props: React.SVGProps<SVGSVGElement>) => (
 		<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-			<path d="M12 5v14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-			<path d="M19 12l-7 7-7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+			<path d="M12 5v14M19 12l-7 7-7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+		</svg>
+	),
+
+	search: (props: React.SVGProps<SVGSVGElement>) => (
+		<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+			<circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
+			<path d="M21 21l-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+		</svg>
+	),
+
+	globe: (props: React.SVGProps<SVGSVGElement>) => (
+		<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+			<circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+			<path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" stroke="currentColor" strokeWidth="2" />
+		</svg>
+	),
+
+	zap: (props: React.SVGProps<SVGSVGElement>) => (
+		<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+			<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="currentColor" />
+		</svg>
+	),
+
+	star: (props: React.SVGProps<SVGSVGElement>) => (
+		<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+			<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor" />
+		</svg>
+	),
+
+	clock: (props: React.SVGProps<SVGSVGElement>) => (
+		<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+			<circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+			<path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+		</svg>
+	),
+
+	chartBar: (props: React.SVGProps<SVGSVGElement>) => (
+		<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+			<path d="M12 20V10M18 20V4M6 20v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+		</svg>
+	),
+
+	refresh: (props: React.SVGProps<SVGSVGElement>) => (
+		<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+			<path d="M1 4v6h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+			<path d="M3.51 15a9 9 0 102.13-9.36L1 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+		</svg>
+	),
+
+	codeXML: (props: React.SVGProps<SVGSVGElement>) => (
+		<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+			<path d="M16 18l6-6-6-6M8 6l-6 6 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
 		</svg>
 	),
 };

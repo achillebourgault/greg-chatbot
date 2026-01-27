@@ -164,36 +164,49 @@ export function ModelPicker({ value, onChange, disabled, placement = "up", lang 
 					setSearch("");
 				}}
 				className={[
-					"w-full flex items-start gap-3 px-3 py-2.5 rounded-lg",
-					"text-left transition-all duration-150",
-					isSelected ? "bg-white/[0.08]" : "hover:bg-white/[0.04]",
+					"group w-full flex items-start gap-3 px-3 py-2.5 rounded-[12px]",
+					"text-left transition-all duration-200",
+					isSelected 
+						? "bg-[var(--accent-cyan-glow)] border border-[rgba(0,212,255,0.20)]" 
+						: "hover:bg-[rgba(255,255,255,0.04)] border border-transparent hover:border-[var(--glass-border)]",
 				].join(" ")}
 			>
 				<div className="min-w-0 flex-1">
 					<div className="flex items-start justify-between gap-2">
-						<div className={`text-sm truncate ${isSelected ? "text-zinc-100" : "text-zinc-200"}`}>
+						<div className={`text-[13px] truncate font-medium ${isSelected ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]"}`}>
 							{getModelDisplayName(model.id)}
 						</div>
-						{isSelected ? <Icons.check className="w-4 h-4 text-zinc-200 flex-shrink-0 mt-0.5" /> : null}
+						{isSelected ? (
+							<div className="flex-shrink-0 mt-0.5 w-5 h-5 rounded-full bg-[var(--accent-cyan-glow)] border border-[rgba(0,212,255,0.30)] flex items-center justify-center">
+								<Icons.check className="w-3 h-3 text-[var(--accent-cyan)]" />
+							</div>
+						) : null}
 					</div>
-					<div className="mt-1 text-xs text-zinc-400 flex flex-wrap items-center gap-x-2 gap-y-1">
-						{badge === "favorite" ? <span className="text-amber-300">{t(lang, "modelPicker.badge.favorite")}</span> : null}
-						{badge === "recent" ? <span className="text-sky-300">{t(lang, "modelPicker.badge.recent")}</span> : null}
-						{badge ? <span className="text-zinc-600">•</span> : null}
-						<span className={free ? "text-emerald-300" : "text-zinc-400"}>
+					<div className="mt-1.5 text-[11px] flex flex-wrap items-center gap-x-2 gap-y-1">
+						{badge === "favorite" ? (
+							<span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[6px] bg-[var(--accent-orange-glow)] border border-[rgba(255,149,0,0.20)] text-[var(--accent-orange)] text-[10px] font-medium">
+								<Icons.star className="w-2.5 h-2.5" />
+								{t(lang, "modelPicker.badge.favorite")}
+							</span>
+						) : null}
+						{badge === "recent" ? (
+							<span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[6px] bg-[rgba(255,255,255,0.04)] border border-[var(--glass-border)] text-[var(--text-secondary)] text-[10px] font-medium">
+								<Icons.clock className="w-2.5 h-2.5" />
+								{t(lang, "modelPicker.badge.recent")}
+							</span>
+						) : null}
+						<span className={[
+							"inline-flex items-center px-1.5 py-0.5 rounded-[6px] text-[10px] font-medium",
+							free 
+								? "bg-[rgba(52,199,89,0.10)] border border-[rgba(52,199,89,0.20)] text-[#34C759]" 
+								: "bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] text-[#8A8F98]"
+						].join(" ")}>
 							{free ? t(lang, "modelPicker.badge.free") : t(lang, "modelPicker.badge.paid")}
 						</span>
 						{!free && (
-							<>
-								<span className="text-zinc-600">•</span>
-								<span>
-									{t(lang, "modelPicker.price.in")} {formatUsd(inPerMillion)}/1M
-								</span>
-								<span className="text-zinc-600">•</span>
-								<span>
-									{t(lang, "modelPicker.price.out")} {formatUsd(outPerMillion)}/1M
-								</span>
-							</>
+							<span className="text-[var(--text-subtle)] text-[10px]">
+								{t(lang, "modelPicker.price.in")} {formatUsd(inPerMillion)} · {t(lang, "modelPicker.price.out")} {formatUsd(outPerMillion)}/M
+							</span>
 						)}
 					</div>
 				</div>
@@ -203,38 +216,41 @@ export function ModelPicker({ value, onChange, disabled, placement = "up", lang 
 
 	return (
 		<div ref={containerRef} className="relative">
+			
 			<button
 				type="button"
 				onClick={() => !disabled && setIsOpen((v) => !v)}
 				disabled={disabled}
 				className={[
-					"flex items-center gap-2 px-3 py-1.5 rounded-lg",
-					"bg-white/[0.04] border border-white/[0.08]",
-					"text-left transition-all duration-150",
-					"hover:bg-white/[0.08] hover:border-white/[0.12]",
+					"group flex items-center gap-2 px-3 py-1.5 rounded-[var(--radius-lg)]",
+					"bg-[rgba(255,255,255,0.04)] border border-[var(--glass-border)]",
+					"text-left transition-all duration-200",
+					"hover:bg-[rgba(255,255,255,0.06)] hover:border-[var(--glass-border-hover)]",
 					"disabled:opacity-50 disabled:cursor-not-allowed",
-					isOpen ? "border-white/[0.15] bg-white/[0.06]" : "",
+					isOpen ? "border-[rgba(0,212,255,0.25)] bg-[rgba(255,255,255,0.06)]" : "",
 				].join(" ")}
 			>
 				<div className="min-w-0">
-					<div className="text-xs text-zinc-100 font-medium truncate">{selectedDisplayName}</div>
+					<div className="text-[12px] text-[var(--text-secondary)] font-medium truncate group-hover:text-[var(--text-primary)] transition-colors">{selectedDisplayName}</div>
 				</div>
 				<Icons.chevronDown
-					className={`w-3.5 h-3.5 text-zinc-500 transition-transform duration-150 ${isOpen ? "rotate-180" : ""}`}
+					className={`w-3.5 h-3.5 text-[var(--text-subtle)] group-hover:text-[var(--text-secondary)] transition-all duration-200 ${isOpen ? "rotate-180 text-[var(--text-secondary)]" : ""}`}
 				/>
 			</button>
 
+			
 			{isOpen && (
 				<div
 					className={[
-						"absolute right-0 w-80 z-50 animate-in fade-in duration-150",
-						placement === "up" ? "bottom-full mb-2 slide-in-from-bottom-2" : "top-full mt-2 slide-in-from-top-2",
+						"absolute right-0 w-[360px] z-50 animate-scale-in",
+						placement === "up" ? "bottom-full mb-2" : "top-full mt-2",
 					].join(" ")}
 				>
-					<div className="rounded-xl bg-zinc-900 border border-white/[0.08] shadow-xl shadow-black/50 overflow-hidden">
-						<div className="p-2 border-b border-white/[0.06] flex items-center justify-between gap-2">
-							<div className="text-[11px] text-zinc-500">{t(lang, "modelPicker.pricing")}</div>
-							<div className="flex items-center gap-1">
+					<div className="rounded-[var(--radius-2xl)] glass-strong shadow-[var(--shadow-xl)] overflow-hidden">
+						
+						<div className="p-3 border-b border-[var(--divider)] flex items-center justify-between gap-2">
+							<div className="text-[11px] text-[var(--text-subtle)] font-medium">{t(lang, "modelPicker.pricing")}</div>
+							<div className="flex items-center gap-1 p-0.5 rounded-[var(--radius-lg)] bg-[rgba(255,255,255,0.03)] border border-[var(--glass-border)]">
 								{(
 									[
 										{ id: "all" as const, label: t(lang, "modelPicker.filter.all") },
@@ -247,10 +263,10 @@ export function ModelPicker({ value, onChange, disabled, placement = "up", lang 
 										type="button"
 										onClick={() => setPriceFilter(opt.id)}
 										className={[
-											"h-7 px-2.5 rounded-lg text-[11px] border transition-colors",
+											"h-7 px-3 rounded-[var(--radius-sm)] text-[11px] font-medium transition-all duration-200",
 											priceFilter === opt.id
-												? "bg-white/[0.10] border-white/[0.16] text-zinc-100"
-												: "bg-transparent border-white/[0.08] text-zinc-400 hover:bg-white/[0.06] hover:text-zinc-200",
+												? "bg-[rgba(255,255,255,0.08)] text-[var(--text-primary)]"
+												: "text-[var(--text-muted)] hover:text-[var(--text-primary)]",
 										].join(" ")}
 									>
 										{opt.label}
@@ -259,9 +275,10 @@ export function ModelPicker({ value, onChange, disabled, placement = "up", lang 
 							</div>
 						</div>
 
-						<div className="p-2 border-b border-white/[0.06]">
-							<div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.06]">
-								<svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						
+						<div className="p-3 border-b border-[var(--divider)]">
+							<div className="flex items-center gap-2.5 px-3 py-2.5 rounded-[var(--radius-lg)] bg-[rgba(255,255,255,0.03)] border border-[var(--glass-border)] focus-within:border-[rgba(0,212,255,0.25)] focus-within:bg-[rgba(255,255,255,0.04)] transition-all duration-200">
+								<svg className="w-4 h-4 text-[var(--text-subtle)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 									<path
 										strokeLinecap="round"
 										strokeLinejoin="round"
@@ -274,42 +291,66 @@ export function ModelPicker({ value, onChange, disabled, placement = "up", lang 
 									value={search}
 									onChange={(e) => setSearch(e.target.value)}
 									placeholder={t(lang, "modelPicker.searchPlaceholder")}
-									className="flex-1 bg-transparent text-sm text-zinc-100 placeholder-zinc-500 outline-none"
+									className="flex-1 bg-transparent text-[13px] text-[var(--text-primary)] placeholder-[var(--text-subtle)] outline-none"
 									autoFocus
 								/>
+								{search && (
+									<button
+										onClick={() => setSearch("")}
+										className="text-[var(--text-subtle)] hover:text-[var(--text-primary)] transition-colors"
+									>
+										<Icons.close className="w-3.5 h-3.5" />
+									</button>
+								)}
 							</div>
 						</div>
 
-						<div className="max-h-[min(420px,50vh)] overflow-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10">
+						
+						<div className="max-h-[min(420px,50vh)] overflow-auto scrollbar-premium">
 							{error ? (
-								<div className="p-4 text-center text-sm text-red-400">{error}</div>
+								<div className="p-6 text-center">
+<div className="w-10 h-10 mx-auto mb-3 rounded-full bg-[var(--accent-red-glow)] flex items-center justify-center">
+									<Icons.close className="w-5 h-5 text-[var(--accent-red)]" />
+								</div>
+								<div className="text-[13px] text-[var(--accent-red)]">{error}</div>
+								</div>
 							) : models === null ? (
-								<div className="p-4 text-center text-sm text-zinc-500">{t(lang, "modelPicker.loading")}</div>
+								<div className="p-6 text-center">
+									<div className="w-8 h-8 mx-auto mb-3 rounded-full border-2 border-[rgba(255,255,255,0.15)] border-t-[var(--accent-cyan)] animate-spin" />
+									<div className="text-[13px] text-[var(--text-muted)]">{t(lang, "modelPicker.loading")}</div>
+								</div>
 							) : filteredModels.length === 0 ? (
-								<div className="p-4 text-center text-sm text-zinc-500">
-									{search.trim() ? t(lang, "modelPicker.emptySearch") : t(lang, "modelPicker.empty")}
+								<div className="p-6 text-center">
+									<div className="w-10 h-10 mx-auto mb-3 rounded-full bg-[rgba(255,255,255,0.04)] flex items-center justify-center">
+										<Icons.search className="w-5 h-5 text-[var(--text-subtle)]" />
+									</div>
+									<div className="text-[13px] text-[var(--text-muted)]">
+										{search.trim() ? t(lang, "modelPicker.emptySearch") : t(lang, "modelPicker.empty")}
+									</div>
 								</div>
 							) : (
 								<div className="p-2">
 									{showSuggested && (
 										<div className="mb-2">
 											{favoriteModels.length > 0 && (
-												<div className="mb-2">
-													<div className="px-3 py-1 text-[10px] font-medium text-zinc-500 uppercase tracking-wider">
+												<div className="mb-3">
+																<div className="px-3 py-1.5 text-[10px] font-semibold text-[var(--accent-orange)] uppercase tracking-wider flex items-center gap-2">
+														<Icons.star className="w-3 h-3" />
 														{t(lang, "modelPicker.section.favorites")}
 													</div>
 													{favoriteModels.map((m) => renderModelButton(m, "favorite"))}
 												</div>
 											)}
 											{recentModels.length > 0 && (
-												<div className="mb-2">
-													<div className="px-3 py-1 text-[10px] font-medium text-zinc-500 uppercase tracking-wider">
+												<div className="mb-3">
+																<div className="px-3 py-1.5 text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider flex items-center gap-2">
+														<Icons.clock className="w-3 h-3" />
 														{t(lang, "modelPicker.section.recent")}
 													</div>
 													{recentModels.map((m) => renderModelButton(m, "recent"))}
 												</div>
 											)}
-											<div className="mt-2 h-px bg-white/[0.06]" />
+															<div className="mt-3 h-px bg-[var(--divider)]" />
 										</div>
 									)}
 
@@ -317,8 +358,8 @@ export function ModelPicker({ value, onChange, disabled, placement = "up", lang 
 										const list = showSuggested ? providerModels.filter((m) => !suggestedIds.has(m.id)) : providerModels;
 										if (list.length === 0) return null;
 										return (
-											<div key={provider} className="mb-2 last:mb-0">
-												<div className="px-3 py-1 text-[10px] font-medium text-zinc-500 uppercase tracking-wider">
+											<div key={provider} className="mb-3 last:mb-0">
+												<div className="px-3 py-1.5 text-[10px] font-semibold text-[var(--text-subtle)] uppercase tracking-wider">
 													{provider}
 												</div>
 												{list.map((m) => renderModelButton(m))}

@@ -111,11 +111,11 @@ function availabilityLabel(v?: string | null): string | null {
 function Chips({ items }: { items: string[] }) {
 	if (!items.length) return null;
 	return (
-		<div className="mt-2 flex flex-wrap gap-1">
+		<div className="mt-2 flex flex-wrap gap-1.5">
 			{items.slice(0, 6).map((c, idx) => (
 				<span
 					key={`${c}-${idx}`}
-					className="px-2 py-0.5 rounded-full border border-white/[0.08] bg-white/[0.03] text-[11px] text-zinc-300"
+					className="px-2 py-0.5 rounded-full border border-[var(--glass-border)] bg-[var(--glass-bg-subtle)] text-[10px] font-medium text-[var(--text-secondary)]"
 				>
 					{c}
 				</span>
@@ -126,8 +126,8 @@ function Chips({ items }: { items: string[] }) {
 
 function CardFrame({ href, children }: { href: string; children: React.ReactNode }) {
 	return (
-		<a href={href} target="_blank" rel="noreferrer" className="block no-underline">
-			<div className="overflow-hidden rounded-xl border border-white/[0.10] bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
+		<a href={href} target="_blank" rel="noreferrer" className="block no-underline group">
+			<div className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--glass-border)] bg-[var(--glass-bg-subtle)] hover:bg-[var(--glass-bg)] hover:border-[var(--glass-border-hover)] transition-colors duration-200">
 				{children}
 			</div>
 		</a>
@@ -136,7 +136,7 @@ function CardFrame({ href, children }: { href: string; children: React.ReactNode
 
 function HeaderLine({ kind, href, siteName }: { kind: SourceKind; href: string; siteName: string }) {
 	return (
-		<div className="text-[11px] text-zinc-500 truncate">
+		<div className="text-[11px] text-[var(--text-muted)] truncate">
 			{labelForKind(kind, siteName)} • {displayHost(href)}
 		</div>
 	);
@@ -144,7 +144,7 @@ function HeaderLine({ kind, href, siteName }: { kind: SourceKind; href: string; 
 
 function TitleLine({ title }: { title: string }) {
 	return (
-		<div className="mt-1 text-[13px] text-zinc-100 font-medium leading-snug">
+		<div className="mt-1 text-[13px] text-[var(--text-primary)] font-medium leading-snug">
 			<span className="block truncate">{title}</span>
 		</div>
 	);
@@ -153,7 +153,7 @@ function TitleLine({ title }: { title: string }) {
 function DescriptionLine({ description }: { description: string | null }) {
 	if (!description) return null;
 	return (
-		<div className="mt-1 text-[12px] text-zinc-400">
+		<div className="mt-1 text-[12px] text-[var(--text-tertiary)]">
 			<span className="block truncate">{description}</span>
 		</div>
 	);
@@ -178,12 +178,12 @@ function Thumb({
 	const cls = mode === "icon" ? "h-5 w-5 object-contain" : "h-full w-full object-cover";
 	const finalUrl = !failed ? url : fallbackUrl ?? null;
 	return (
-		<div className={`${sizeClass} overflow-hidden rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center`}>
+		<div className={`${sizeClass} overflow-hidden rounded-[var(--radius-lg)] bg-[var(--glass-bg-subtle)] border border-[var(--glass-border)] flex items-center justify-center group-hover:border-[var(--glass-border-hover)] transition-colors`}>
 			{finalUrl ? (
 				// eslint-disable-next-line @next/next/no-img-element
 				<img src={finalUrl} alt="" className={cls} onError={() => setFailed(true)} />
 			) : (
-				<div className="text-zinc-600 text-[11px]" />
+				<div className="text-[var(--text-muted)] text-[11px]" />
 			)}
 		</div>
 	);
@@ -242,7 +242,7 @@ export function VideoCard({ href, data }: { href: string; data: UrlCardData }) {
 				<div className="flex-shrink-0 relative">
 					<Thumb url={imageUrl(href, p)} fallbackUrl={iconUrl(href)} mode="wide" />
 					<div className="absolute inset-0 flex items-center justify-center">
-						<div className="h-7 w-7 rounded-full bg-black/50 border border-white/10" />
+						<div className="h-7 w-7 rounded-full bg-[var(--glass-bg-strong)] border border-[var(--glass-border)] backdrop-blur-sm" />
 					</div>
 				</div>
 			</div>
@@ -437,18 +437,18 @@ export function GenericCard({ href, data }: { href: string; data: UrlCardData })
 
 export function ErrorCard({ href, message }: { href: string; message: string }) {
 	return (
-		<a href={href} target="_blank" rel="noreferrer" className="block no-underline">
-			<div className="overflow-hidden rounded-xl border border-white/[0.10] bg-white/[0.02]">
+		<a href={href} target="_blank" rel="noreferrer" className="block no-underline group">
+			<div className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--glass-border)] bg-[var(--glass-bg-subtle)] hover:bg-[var(--glass-bg)] transition-all duration-200">
 				<div className="flex gap-3 p-3 items-start">
 					<div className="flex-shrink-0">
 						<Thumb url={iconUrl(href)} mode="icon" />
 					</div>
 					<div className="flex-1 min-w-0">
-						<div className="text-[11px] text-zinc-500 truncate">Link</div>
-						<div className="mt-1 text-[13px] text-zinc-100 font-medium leading-snug">
+						<div className="text-[11px] text-[var(--text-muted)] truncate">Link</div>
+						<div className="mt-1 text-[13px] text-[var(--text-primary)] font-medium leading-snug">
 							<span className="block truncate">{href}</span>
 						</div>
-						<div className="mt-1 text-[12px] text-red-300/80 truncate">{message}</div>
+						<div className="mt-1 text-[12px] text-pink-400/80 truncate">{message}</div>
 					</div>
 				</div>
 			</div>
@@ -458,13 +458,13 @@ export function ErrorCard({ href, message }: { href: string; message: string }) 
 
 export function LoadingCard() {
 	return (
-		<div className="overflow-hidden rounded-xl border border-white/[0.10] bg-white/[0.02]">
+		<div className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--glass-border)] bg-[var(--glass-bg-subtle)] animate-pulse">
 			<div className="flex gap-3 p-3 items-start">
-				<div className="h-10 w-10 rounded-lg bg-white/[0.04] border border-white/[0.06]" />
+				<div className="h-10 w-10 rounded-[var(--radius-lg)] bg-[var(--glass-bg)] border border-[var(--glass-border)]" />
 				<div className="flex-1 min-w-0">
-					<div className="h-3 w-28 bg-white/[0.04] rounded" />
-					<div className="mt-2 h-4 w-3/4 bg-white/[0.04] rounded" />
-					<div className="mt-2 h-3 w-2/3 bg-white/[0.04] rounded" />
+					<div className="h-3 w-28 bg-[var(--glass-bg)] rounded-full" />
+					<div className="mt-2 h-4 w-3/4 bg-[var(--glass-bg)] rounded-full" />
+					<div className="mt-2 h-3 w-2/3 bg-[var(--glass-bg-subtle)] rounded-full" />
 				</div>
 			</div>
 		</div>

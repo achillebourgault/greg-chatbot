@@ -6,24 +6,28 @@ type Props = React.InputHTMLAttributes<HTMLInputElement> & {
 
 export function TextInput({ className, variant = "default", ...props }: Props) {
 	const baseClasses = `
-		w-full text-sm text-zinc-100 placeholder-zinc-500
-		outline-none focus-visible:outline-none transition-all duration-150
+		w-full text-[14px] text-[var(--text-primary)] placeholder-[var(--text-subtle)]
+		outline-none focus-visible:outline-none transition-all duration-200
 		disabled:opacity-50 disabled:cursor-not-allowed
 	`;
 	
 	const variants = {
 		default: `
-			h-10 px-4 rounded-xl
-			bg-white/[0.03] backdrop-blur-sm
-			border border-white/[0.08]
-			focus:bg-white/[0.05]
+			h-11 px-4 rounded-[var(--radius-lg)]
+			bg-[rgba(255,255,255,0.02)] backdrop-blur-sm
+			border border-[var(--glass-border)]
+			hover:bg-[rgba(255,255,255,0.03)] hover:border-[var(--glass-border-hover)]
+			focus:bg-[rgba(255,255,255,0.04)]
+			focus:border-[var(--accent-cyan)]/40
+			focus:shadow-[0_0_0_3px_var(--accent-cyan-glow)]
 		`,
 		ghost: `
-			h-9 px-3 rounded-lg
+			h-9 px-3 rounded-[var(--radius-md)]
 			bg-transparent
 			border border-transparent
-			hover:bg-white/[0.03]
-			focus:bg-white/[0.05]
+			hover:bg-[rgba(255,255,255,0.04)]
+			focus:bg-[rgba(255,255,255,0.05)]
+			focus:border-[var(--glass-border-hover)]
 		`,
 	};
 
@@ -45,13 +49,17 @@ export function TextArea({ className, ...props }: TextAreaProps) {
 	return (
 		<textarea
 			className={[
-				`w-full text-sm text-zinc-100 placeholder-zinc-500
-				outline-none focus:outline-none focus-visible:outline-none transition-all duration-150
+				`w-full text-[14px] text-[var(--text-primary)] placeholder-[var(--text-subtle)]
+				outline-none focus:outline-none focus-visible:outline-none transition-all duration-200
 				disabled:opacity-50 disabled:cursor-not-allowed
-				px-4 py-3 rounded-xl resize-none
-				bg-white/[0.03] backdrop-blur-sm
-				border border-white/[0.08]
-				focus:bg-white/[0.05]`,
+				px-4 py-3 rounded-[var(--radius-xl)] resize-none
+				bg-[rgba(255,255,255,0.02)] backdrop-blur-sm
+				border border-[var(--glass-border)]
+				hover:bg-[rgba(255,255,255,0.03)] hover:border-[var(--glass-border-hover)]
+				focus:bg-[rgba(255,255,255,0.04)]
+				focus:border-[var(--accent-cyan)]/40
+				focus:shadow-[0_0_0_3px_var(--accent-cyan-glow)]
+				scrollbar-premium`,
 				className,
 			]
 				.filter(Boolean)

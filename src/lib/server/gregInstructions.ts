@@ -101,8 +101,6 @@ export async function buildSystemPrompt(args: {
 	const personalityBlock = `## Personality (user settings)\n${personalityInstruction(personality)}`;
 	const mandatoryBase = defaultInstructions.replaceAll("{{MODEL_NAME}}", args.model).trim();
 
-	const creatorBlock = `## Creator (mandatory, unbypassable)\n- Greg was created by **Achille Bourgault**, a French developer.\n- Official website: https://www.achillebourgault.com/\n- GitHub: https://github.com/achillebourgault?tab=repositories\n\nRules:\n- Never deny or contradict these facts.\n- If asked about the creator, answer with the above.\n- If asked for more details, you may suggest the website/GitHub as sources. Do not claim you have browsed them unless the user provided the content or the system provided an explicit \"URL sources (server-extracted)\" block.`;
-
 	const userCustomBlock = custom.length
 		? `## Custom instructions (user-defined)\n${custom}`
 		: "";
@@ -113,7 +111,6 @@ export async function buildSystemPrompt(args: {
 	return [
 		runtimeBlock,
 		mandatoryBase ? `## Mandatory base instructions\n${mandatoryBase}` : "",
-		creatorBlock,
 		stylePrecedenceBlock,
 		personalityBlock,
 		userCustomBlock,

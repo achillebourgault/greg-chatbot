@@ -343,20 +343,14 @@ function DinoRunner({ ariaLabel, hudRightText }: { ariaLabel: string; hudRightTe
 				@keyframes flap { 0%, 100% { transform: rotate(10deg);} 50% { transform: rotate(-12deg);} }
 				.wing { transform-origin: 6px 0px; animation: flap 0.22s ease-in-out infinite; }
 			`}</style>
-			<defs>
-				<linearGradient id="dinoGrad" x1="0" y1="0" x2="1" y2="0">
-					<stop offset="0%" stopColor="rgba(16,185,129,0.95)" />
-					<stop offset="60%" stopColor="rgba(56,189,248,0.92)" />
-					<stop offset="100%" stopColor="rgba(16,185,129,0.85)" />
-				</linearGradient>
-			</defs>
+			<defs />
 
 			<rect className="bg" x="0" y="0" width={WIDTH} height={HEIGHT} />
 			{Array.from({ length: 36 }).map((_, i) => (
 				<rect key={i} className="gridLine" x={i * 24} y={0} width={1} height={HEIGHT} />
 			))}
 
-			{/* clouds */}
+			
 			<g className="cloudFill">
 				<g ref={cloudARef}>
 					<circle cx="760" cy="38" r="10" />
@@ -370,7 +364,7 @@ function DinoRunner({ ariaLabel, hudRightText }: { ariaLabel: string; hudRightTe
 				</g>
 			</g>
 
-			{/* ground */}
+			
 			<line x1="0" y1={GROUND_Y + 0.5} x2={WIDTH} y2={GROUND_Y + 0.5} className="groundLine" strokeWidth="2" />
 			<g ref={groundRef} fill="rgba(16,185,129,0.42)">
 				{[0, 120, 240, 360, 480, 600, 720, 840, 960, 1080].map((x) => (
@@ -378,18 +372,18 @@ function DinoRunner({ ariaLabel, hudRightText }: { ariaLabel: string; hudRightTe
 				))}
 			</g>
 
-			{/* dino */}
+			
 			<g ref={dinoRef} className="dino" data-state="run" transform={`translate(${DINO_X} ${GROUND_Y})`}>
 				<g className="dinoPose poseRun">
 					<rect x="0" y={-DINO_H_RUN} width={DINO_W} height={DINO_H_RUN} rx="2" fill="rgba(255,255,255,0.30)" />
-					<rect x="3" y={-DINO_H_RUN + 4} width={DINO_W - 6} height={DINO_H_RUN - 8} rx="2" fill="url(#dinoGrad)" opacity="0.55" />
+					<rect x="3" y={-DINO_H_RUN + 4} width={DINO_W - 6} height={DINO_H_RUN - 8} rx="2" fill="rgba(255,255,255,0.10)" />
 					<rect x={DINO_W - 10} y={-DINO_H_RUN + 8} width="3" height="3" fill="rgba(255,255,255,0.9)" />
 					<rect x="6" y={-3} width="6" height="3" fill="rgba(255,255,255,0.30)" className="legA" />
 					<rect x="16" y={-3} width="6" height="3" fill="rgba(255,255,255,0.30)" className="legB" />
 				</g>
 			</g>
 
-			{/* obstacle slots (render 3 concurrently) */}
+			
 			{[0, 1, 2].map((i) => (
 				<g
 					key={i}
@@ -401,26 +395,26 @@ function DinoRunner({ ariaLabel, hudRightText }: { ariaLabel: string; hudRightTe
 					opacity="0"
 					transform={`translate(${WIDTH + 200} ${GROUND_Y})`}
 				>
-					{/* cactus tiny */}
+					
 					<g className="kind cactusTiny">
 						<rect x="0" y="-26" width="14" height="26" fill="rgba(255,255,255,0.22)" />
 						<rect x="2" y="-22" width="10" height="18" fill="rgba(16,185,129,0.45)" />
 						<rect x="9" y="-18" width="6" height="6" fill="rgba(255,255,255,0.10)" />
 					</g>
-					{/* cactus small */}
+					
 					<g className="kind cactusSmall">
 						<rect x="0" y="-34" width="18" height="34" fill="rgba(255,255,255,0.22)" />
 						<rect x="2" y="-28" width="14" height="22" fill="rgba(16,185,129,0.45)" />
 						<rect x="12" y="-26" width="8" height="8" fill="rgba(255,255,255,0.10)" />
 					</g>
-					{/* cactus big */}
+					
 					<g className="kind cactusBig">
 						<rect x="0" y="-48" width="26" height="48" fill="rgba(255,255,255,0.22)" />
 						<rect x="3" y="-40" width="20" height="34" fill="rgba(16,185,129,0.45)" />
 						<rect x="18" y="-34" width="10" height="10" fill="rgba(255,255,255,0.10)" />
 						<rect x="-6" y="-34" width="10" height="10" rx="2" fill="rgba(16,185,129,0.32)" />
 					</g>
-					{/* cactus cluster */}
+					
 					<g className="kind cactusCluster">
 						<rect x="0" y="-40" width="18" height="40" fill="rgba(255,255,255,0.20)" />
 						<rect x="2" y="-34" width="14" height="28" fill="rgba(16,185,129,0.44)" />
@@ -428,14 +422,14 @@ function DinoRunner({ ariaLabel, hudRightText }: { ariaLabel: string; hudRightTe
 						<rect x="19" y="-40" width="20" height="34" fill="rgba(16,185,129,0.38)" />
 						<rect x="8" y="-18" width="10" height="10" rx="2" fill="rgba(16,185,129,0.24)" />
 					</g>
-					{/* bird low (duck) */}
+					
 					<g className="kind birdLow" opacity="0.95">
 						<rect x="0" y="-18" width="30" height="18" rx="3" fill="rgba(255,255,255,0.18)" />
 						<rect x="2" y="-16" width="26" height="14" rx="3" fill="rgba(56,189,248,0.22)" />
 						<rect x="22" y="-14" width="6" height="4" rx="2" fill="rgba(255,255,255,0.18)" />
 						<rect className="wing" x="6" y="-18" width="10" height="2" fill="rgba(255,255,255,0.35)" />
 					</g>
-					{/* bird high (jump) */}
+					
 					<g className="kind birdHigh" opacity="0.95">
 						<rect x="0" y="-18" width="34" height="18" rx="3" fill="rgba(255,255,255,0.16)" />
 						<rect x="2" y="-16" width="30" height="14" rx="3" fill="rgba(56,189,248,0.20)" />
@@ -445,7 +439,7 @@ function DinoRunner({ ariaLabel, hudRightText }: { ariaLabel: string; hudRightTe
 				</g>
 			))}
 
-			{/* HUD */}
+			
 			<text ref={hudLeftRef} x={12} y="22" className="hud" textAnchor="start" />
 			<text ref={hudRightRef} x={WIDTH - 12} y="22" className="hud" textAnchor="end" />
 		</svg>
@@ -456,13 +450,13 @@ export function DinoLoader({ className, subtitle, tokens }: Props) {
 	const safeTokens = typeof tokens === "number" && Number.isFinite(tokens) && tokens >= 0 ? Math.floor(tokens) : 0;
 	return (
 		<div
-			className={["w-full rounded-2xl border border-white/[0.10] bg-white/[0.02] overflow-hidden", className]
+			className={["w-full rounded-[var(--radius-xl)] border border-[var(--glass-border)] bg-[var(--glass-bg-subtle)] overflow-hidden", className]
 			.filter(Boolean)
 			.join(" ")}
 		>
 			<div className="p-4">
 				<DinoRunner ariaLabel={subtitle} hudRightText={`tokens ${safeTokens}`} />
-				<div className="mt-3 text-sm text-zinc-300">{subtitle}</div>
+				<div className="mt-3 text-sm text-[var(--text-secondary)]">{subtitle}</div>
 			</div>
 		</div>
 	);

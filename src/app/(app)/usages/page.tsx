@@ -143,29 +143,29 @@ function AnimatedLineChart({ series, label, lang }: { series: { ts: number; v: n
 	const progress = Math.min(1, points.length / 14);
 
 	return (
-		<div className="rounded-xl bg-white/[0.02] border border-white/[0.06] p-4">
+		<div className="rounded-[var(--radius-xl)] bg-[var(--glass-bg-subtle)] border border-[var(--glass-border)] p-5">
 			<div className="flex items-center justify-between gap-3">
-				<div className="text-sm font-semibold text-zinc-100">{label}</div>
-				<div className="text-[11px] text-zinc-500">{formatMoneyUsd(series.reduce((a, b) => a + b.v, 0), lang)}</div>
+				<div className="text-base font-bold text-[var(--text-primary)]">{label}</div>
+				<div className="text-sm text-[var(--text-secondary)] px-3 py-1 rounded-[var(--radius-md)] bg-[var(--glass-bg)] border border-[var(--glass-border)]">
+					{formatMoneyUsd(series.reduce((a, b) => a + b.v, 0), lang)}
+				</div>
 			</div>
-			<div className="mt-3 overflow-hidden rounded-lg bg-zinc-950/40 border border-white/[0.06]">
+			<div className="mt-4 overflow-hidden rounded-[var(--radius-lg)] bg-[var(--glass-bg-strong)] border border-[var(--glass-border)]">
 				<svg viewBox={`0 0 ${w} ${h}`} className="w-full h-[160px]">
-					<defs>
-						<linearGradient id="g" x1="0" x2="0" y1="0" y2="1">
-							<stop offset="0" stopColor="rgba(16,185,129,0.35)" />
-							<stop offset="1" stopColor="rgba(16,185,129,0.00)" />
-						</linearGradient>
-					</defs>
+					<defs />
 
 					{points.length > 1 ? (
-						<path d={`${d} L ${points[points.length - 1].x},${h - pad} L ${points[0].x},${h - pad} Z`} fill="url(#g)" />
+						<path
+							d={`${d} L ${points[points.length - 1].x},${h - pad} L ${points[0].x},${h - pad} Z`}
+							fill="var(--accent-cyan-glow)"
+						/>
 					) : null}
 
 					<path
 						d={d}
 						fill="none"
-						stroke="rgba(16,185,129,0.85)"
-						strokeWidth={2}
+						stroke="var(--accent-cyan)"
+						strokeWidth={2.5}
 						strokeLinecap="round"
 						strokeLinejoin="round"
 						style={{
@@ -174,17 +174,18 @@ function AnimatedLineChart({ series, label, lang }: { series: { ts: number; v: n
 							transition: "stroke-dashoffset 700ms ease-out",
 						}}
 					/>
+					<defs />
 
-					{/* points */}
+					
 					{points.map((p) => (
 						<circle
 							key={p.ts}
 							cx={p.x}
 							cy={p.y}
-							r={3}
-							fill="rgba(255,255,255,0.20)"
-							stroke="rgba(16,185,129,0.65)"
-							strokeWidth="1"
+							r={4}
+							fill="var(--glass-bg)"
+							stroke="var(--accent-cyan)"
+							strokeWidth="2"
 							opacity={Math.min(1, progress * 1.2)}
 						>
 							<title>{`${new Date(p.ts).toLocaleDateString(undefined, { month: "short", day: "2-digit" })}: ${formatMoneyUsd(p.v, lang)}`}</title>
@@ -336,71 +337,70 @@ export default function UsagesRoute() {
 	}, [modelAgg, modelPage]);
 
 	const statCard = (label: string, value: string, hint?: string) => (
-		<div className="rounded-xl bg-white/[0.02] border border-white/[0.06] p-4">
-			<div className="text-xs text-zinc-500">{label}</div>
-			<div className="mt-1 text-lg font-semibold text-zinc-100">{value}</div>
-			{hint ? <div className="mt-1 text-xs text-zinc-500">{hint}</div> : null}
+		<div className="rounded-[var(--radius-xl)] bg-[var(--glass-bg-subtle)] border border-[var(--glass-border)] p-5 hover:border-[var(--glass-border-hover)] transition-colors duration-200">
+			<div className="text-xs text-[var(--text-tertiary)] font-medium">{label}</div>
+			<div className="mt-2 text-2xl font-bold text-[var(--text-primary)]">{value}</div>
+			{hint ? <div className="mt-2 text-xs text-[var(--text-muted)]">{hint}</div> : null}
 		</div>
 	);
 
 	return (
-		<div className="h-full w-full overflow-auto">
-			<header className="sticky top-0 z-10 flex items-center justify-between gap-3 px-5 py-3 border-b border-white/[0.06] bg-zinc-950/80 backdrop-blur">
-				<div className="flex items-center gap-3">
-					<Button
-						variant="ghost"
-						size="icon"
+		<div className="h-full w-full overflow-auto scrollbar-premium">
+			
+			<header className="sticky top-0 z-10 flex items-center justify-between gap-3 px-6 py-4 border-b border-[var(--glass-border)] bg-[var(--glass-bg-strong)] backdrop-blur-xl">
+				<div className="flex items-center gap-4">
+					<button
 						onClick={() => router.push("/")}
-						className="text-zinc-400 hover:text-zinc-100"
+						className="w-10 h-10 rounded-[var(--radius-lg)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--glass-bg)] transition-all duration-200"
 						title={t(lang, "actions.back")}
 					>
-						<Icons.arrowLeft className="w-4 h-4" />
-					</Button>
-					<div>
-						<div className="text-sm font-semibold text-zinc-100">{t(lang, "analytics.title")}</div>
-						<div className="text-[11px] text-zinc-500">{t(lang, "analytics.subtitle")}</div>
+						<Icons.arrowLeft className="w-5 h-5" />
+					</button>
+					<div className="flex items-center gap-3">
+						<div className="w-10 h-10 rounded-[var(--radius-lg)] bg-[var(--glass-bg-subtle)] border border-[var(--glass-border)] flex items-center justify-center">
+							<Icons.chartBar className="w-5 h-5 text-[var(--text-primary)]" />
+						</div>
+						<div>
+							<div className="text-base font-bold text-[var(--text-primary)]">{t(lang, "analytics.title")}</div>
+							<div className="text-xs text-[var(--text-muted)]">{t(lang, "analytics.subtitle")}</div>
+						</div>
 					</div>
 				</div>
 
-				<div className="flex items-center gap-2">
-					<Button
-						variant="ghost"
+				<div className="flex items-center gap-3">
+					<button
 						onClick={() => setConfirmResetOpen(true)}
-						className="text-zinc-400 hover:text-zinc-100"
+						className="px-3 py-1.5 rounded-[var(--radius-md)] text-xs font-medium text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--glass-bg)] transition-all duration-200"
 						title={t(lang, "analytics.resetMetrics")}
 					>
 						{t(lang, "analytics.resetMetrics")}
-					</Button>
-					<div className="text-[11px] text-zinc-500">
+					</button>
+					<div className="text-xs text-[var(--text-muted)] px-2 py-1 rounded-[var(--radius-sm)] bg-[var(--glass-bg)] border border-[var(--glass-border)]">
 						{pricingReady ? t(lang, "analytics.pricing.ok") : t(lang, "analytics.pricing.loading")}
 					</div>
 				</div>
 			</header>
 
+			
 			{confirmResetOpen ? (
-				<div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-5">
-					<div className="w-full max-w-md rounded-2xl border border-white/[0.12] bg-zinc-950 p-5">
-						<div className="flex items-start justify-between gap-3">
-							<div>
-								<div className="text-sm font-semibold text-zinc-100">{t(lang, "analytics.resetModal.title")}</div>
-								<div className="mt-1 text-xs text-zinc-500 leading-relaxed">{t(lang, "analytics.resetModal.body")}</div>
+				<div className="fixed inset-0 z-50 grid place-items-center bg-black/70 backdrop-blur-sm p-5">
+					<div className="w-full max-w-md rounded-[var(--radius-xl)] glass-strong p-6 animate-scale-in">
+						<div className="flex items-start gap-4">
+							<div className="w-12 h-12 rounded-[var(--radius-xl)] bg-[var(--accent-orange-glow)] border border-[var(--glass-border)] ring-1 ring-[var(--accent-orange)] ring-opacity-25 flex items-center justify-center flex-shrink-0">
+								<Icons.refresh className="w-6 h-6 text-[var(--accent-orange)]" />
 							</div>
-							<Button
-								variant="ghost"
-								size="icon"
-								onClick={() => setConfirmResetOpen(false)}
-								className="text-zinc-400 hover:text-zinc-100"
-							>
-								<Icons.close className="w-4 h-4" />
-							</Button>
+							<div>
+								<div className="text-base font-bold text-[var(--text-primary)]">{t(lang, "analytics.resetModal.title")}</div>
+								<div className="mt-2 text-sm text-[var(--text-secondary)] leading-relaxed">{t(lang, "analytics.resetModal.body")}</div>
+							</div>
 						</div>
 
-						<div className="mt-4 flex items-center justify-end gap-2">
+						<div className="mt-6 flex items-center justify-end gap-3">
 							<Button variant="ghost" onClick={() => setConfirmResetOpen(false)}>
 								{t(lang, "actions.cancel")}
 							</Button>
 							<Button
-								variant="secondary"
+								variant="primary"
 								onClick={() => {
 									resetModelStats();
 									setConfirmResetOpen(false);
@@ -413,14 +413,15 @@ export default function UsagesRoute() {
 				</div>
 			) : null}
 
-			<div className="px-5 py-5">
+			<div className="px-6 py-6">
 				<div className="w-full">
-					<div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-						<div className="flex items-center gap-2">
-							<div className="text-[11px] text-zinc-500">{t(lang, "analytics.range")}</div>
+					
+					<div className="mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+						<div className="flex items-center gap-3">
+							<div className="text-xs text-[var(--text-tertiary)] font-medium">{t(lang, "analytics.range")}</div>
 							<div className="relative">
 								<select
-									className="h-9 appearance-none rounded-xl bg-zinc-950 border border-white/[0.08] pl-3 pr-9 text-sm text-zinc-200 outline-none hover:bg-white/[0.02] focus:border-white/[0.18]"
+									className="h-10 appearance-none rounded-[var(--radius-lg)] bg-[var(--glass-bg-subtle)] border border-[var(--glass-border)] pl-4 pr-10 text-sm text-[var(--text-secondary)] outline-none hover:bg-[var(--glass-bg)] focus:border-[var(--glass-border-hover)] transition-colors duration-200"
 									value={rangeDays}
 									onChange={(e) => setRangeDays(Number(e.target.value))}
 								>
@@ -430,36 +431,37 @@ export default function UsagesRoute() {
 										{ label: t(lang, "analytics.range.30d"), value: 30 },
 										{ label: t(lang, "analytics.range.90d"), value: 90 },
 									].map((opt) => (
-										<option className="bg-zinc-950 text-zinc-100" key={`option-${opt.value}`} value={opt.value}>
+										<option className="bg-[var(--bg-base)] text-[var(--text-primary)]" key={`option-${opt.value}`} value={opt.value}>
 											{opt.label}
 										</option>
 									))}
 								</select>
-								<Icons.chevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+								<Icons.chevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
 							</div>
 						</div>
-						<div className="flex items-center gap-2">
-							<div className="text-[11px] text-zinc-500">{t(lang, "analytics.model")}</div>
+						<div className="flex items-center gap-3">
+							<div className="text-xs text-[var(--text-tertiary)] font-medium">{t(lang, "analytics.model")}</div>
 							<div className="relative">
 								<select
-									className="h-9 min-w-[220px] appearance-none rounded-xl bg-zinc-950 border border-white/[0.08] pl-3 pr-9 text-sm text-zinc-200 outline-none hover:bg-white/[0.02] focus:border-white/[0.18]"
+									className="h-10 min-w-[240px] appearance-none rounded-[var(--radius-lg)] bg-[var(--glass-bg-subtle)] border border-[var(--glass-border)] pl-4 pr-10 text-sm text-[var(--text-secondary)] outline-none hover:bg-[var(--glass-bg)] focus:border-[var(--glass-border-hover)] transition-colors duration-200"
 									value={modelFilter}
 									onChange={(e) => setModelFilter(e.target.value)}
 								>
-									<option className="bg-zinc-950 text-zinc-100" value="all">
+									<option className="bg-[var(--bg-base)] text-[var(--text-primary)]" value="all">
 										{t(lang, "analytics.allModels")}
 									</option>
 									{modelIds.map((id) => (
-										<option className="bg-zinc-950 text-zinc-100" key={id} value={id}>
+										<option className="bg-[var(--bg-base)] text-[var(--text-primary)]" key={id} value={id}>
 											{getModelDisplayName(id)}
 										</option>
 									))}
 								</select>
-								<Icons.chevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+								<Icons.chevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
 							</div>
 						</div>
 					</div>
 
+					
 					<div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 						{statCard(t(lang, "analytics.estimatedCost.filtered"), formatMoneyUsd(filteredTotals.totalCost, lang), t(lang, "analytics.estimatedCost.hint"))}
 						{statCard(
@@ -474,24 +476,30 @@ export default function UsagesRoute() {
 						)}
 					</div>
 
-					<div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-4">
+					
+					<div className="mt-5 grid grid-cols-1 lg:grid-cols-3 gap-4">
 						<div className="lg:col-span-2">
 							<AnimatedLineChart series={series} label={t(lang, "analytics.estimatedSpend")} lang={lang} />
 						</div>
-						<div className="rounded-xl bg-white/[0.02] border border-white/[0.06] p-4">
-							<div className="text-sm font-semibold text-zinc-100">{t(lang, "analytics.topModels")}</div>
-							<div className="text-xs text-zinc-500 mt-1">{t(lang, "analytics.byEstimatedCost")}</div>
-							<div className="mt-3 space-y-2">
+						<div className="rounded-[var(--radius-xl)] bg-[var(--glass-bg-subtle)] border border-[var(--glass-border)] p-5">
+							<div className="text-base font-bold text-[var(--text-primary)]">{t(lang, "analytics.topModels")}</div>
+							<div className="text-xs text-[var(--text-muted)] mt-1">{t(lang, "analytics.byEstimatedCost")}</div>
+							<div className="mt-4 space-y-3">
 								{topModels.length === 0 ? (
-									<div className="text-sm text-zinc-500">{t(lang, "common.noData")}</div>
+									<div className="text-sm text-[var(--text-muted)]">{t(lang, "common.noData")}</div>
 								) : (
-									topModels.map((m) => (
-										<div key={m.modelId} className="flex items-center justify-between gap-3">
-											<div className="min-w-0">
-												<div className="text-sm text-zinc-200 truncate">{getModelDisplayName(m.modelId)}</div>
-												<div className="text-[11px] text-zinc-500 truncate">{m.modelId}</div>
+									topModels.map((m, i) => (
+										<div key={m.modelId} className="flex items-center justify-between gap-3 p-2 rounded-[var(--radius-md)] hover:bg-[var(--glass-bg)] transition-colors">
+											<div className="flex items-center gap-3 min-w-0">
+												<div className="w-6 h-6 rounded-[var(--radius-sm)] bg-[var(--glass-bg)] border border-[var(--glass-border)] flex items-center justify-center text-[10px] font-bold text-[var(--text-muted)]">
+													{i + 1}
+												</div>
+												<div className="min-w-0">
+													<div className="text-sm text-[var(--text-primary)] truncate">{getModelDisplayName(m.modelId)}</div>
+													<div className="text-[10px] text-[var(--text-muted)] truncate">{m.calls} calls</div>
+												</div>
 											</div>
-											<div className="text-sm text-zinc-200 flex-shrink-0">{formatMoneyUsd(m.costUsd, lang)}</div>
+											<div className="text-sm font-semibold text-[var(--text-primary)] flex-shrink-0">{formatMoneyUsd(m.costUsd, lang)}</div>
 										</div>
 									))
 								)}
@@ -499,47 +507,48 @@ export default function UsagesRoute() {
 						</div>
 					</div>
 
-					<div className="mt-6 rounded-2xl bg-zinc-900 border border-white/[0.08] overflow-hidden">
-						<div className="px-5 py-4 border-b border-white/[0.06]">
-							<div className="text-sm font-semibold text-zinc-100">{t(lang, "analytics.byModel.title")}</div>
-							<div className="text-xs text-zinc-500 mt-1">{t(lang, "analytics.byModel.subtitle")}</div>
+					
+					<div className="mt-6 rounded-[var(--radius-xl)] glass overflow-hidden">
+						<div className="px-6 py-5 border-b border-[var(--glass-border)] bg-[var(--glass-bg-subtle)]">
+							<div className="text-base font-bold text-[var(--text-primary)]">{t(lang, "analytics.byModel.title")}</div>
+							<div className="text-sm text-[var(--text-muted)] mt-1">{t(lang, "analytics.byModel.subtitle")}</div>
 						</div>
 						<div className="overflow-auto">
 							<table className="min-w-full text-sm">
-								<thead className="text-[11px] uppercase tracking-wide text-zinc-500 bg-zinc-950/40">
+								<thead className="text-[11px] uppercase tracking-wider font-semibold text-[var(--text-tertiary)] bg-[var(--glass-bg-subtle)]">
 									<tr>
-										<th className="text-left px-5 py-3">{t(lang, "analytics.table.model")}</th>
-										<th className="text-right px-5 py-3">{t(lang, "analytics.table.calls")}</th>
-										<th className="text-right px-5 py-3">{t(lang, "analytics.table.tokensIn")}</th>
-										<th className="text-right px-5 py-3">{t(lang, "analytics.table.tokensOut")}</th>
-										<th className="text-right px-5 py-3">{t(lang, "analytics.table.cost")}</th>
+										<th className="text-left px-6 py-4">{t(lang, "analytics.table.model")}</th>
+										<th className="text-right px-6 py-4">{t(lang, "analytics.table.calls")}</th>
+										<th className="text-right px-6 py-4">{t(lang, "analytics.table.tokensIn")}</th>
+										<th className="text-right px-6 py-4">{t(lang, "analytics.table.tokensOut")}</th>
+										<th className="text-right px-6 py-4">{t(lang, "analytics.table.cost")}</th>
 									</tr>
 								</thead>
-								<tbody className="divide-y divide-white/[0.06]">
+								<tbody className="divide-y divide-[var(--glass-border)]">
 									{modelAgg.length === 0 ? (
 										<tr>
-											<td className="px-5 py-6 text-zinc-500" colSpan={5}>
+											<td className="px-6 py-8 text-[var(--text-muted)] text-center" colSpan={5}>
 												{t(lang, "common.noData")}
 											</td>
 										</tr>
 									) : (
 										pagedModels.items.map((m) => (
-											<tr key={m.modelId} className="hover:bg-white/[0.02]">
-												<td className="px-5 py-3">
-													<div className="text-zinc-200">{getModelDisplayName(m.modelId)}</div>
-													<div className="text-[11px] text-zinc-500">{m.modelId}</div>
+											<tr key={m.modelId} className="hover:bg-[var(--glass-bg-subtle)] transition-colors">
+												<td className="px-6 py-4">
+													<div className="text-[var(--text-primary)] font-medium">{getModelDisplayName(m.modelId)}</div>
+													<div className="text-[11px] text-[var(--text-muted)]">{m.modelId}</div>
 												</td>
-												<td className="px-5 py-3 text-right text-zinc-200">{formatInt(m.calls, lang)}</td>
-												<td className="px-5 py-3 text-right text-zinc-200">{formatInt(m.inTokens, lang)}</td>
-												<td className="px-5 py-3 text-right text-zinc-200">{formatInt(m.outTokens, lang)}</td>
-													<td className="px-5 py-3 text-right text-zinc-200">{formatMoneyUsd(m.costUsd, lang)}</td>
+												<td className="px-6 py-4 text-right text-[var(--text-secondary)]">{formatInt(m.calls, lang)}</td>
+												<td className="px-6 py-4 text-right text-[var(--text-secondary)]">{formatInt(m.inTokens, lang)}</td>
+												<td className="px-6 py-4 text-right text-[var(--text-secondary)]">{formatInt(m.outTokens, lang)}</td>
+												<td className="px-6 py-4 text-right text-[var(--text-primary)] font-medium">{formatMoneyUsd(m.costUsd, lang)}</td>
 											</tr>
 										))
 									)}
 								</tbody>
 							</table>
 						</div>
-						<div className="flex items-center justify-between px-5 py-4 border-t border-white/[0.06] text-xs text-zinc-500">
+						<div className="flex items-center justify-between px-6 py-4 border-t border-[var(--glass-border)] text-xs text-[var(--text-muted)]">
 							<div>
 								{t(lang, "common.page")} {pagedModels.page}/{pagedModels.totalPages}
 							</div>
@@ -554,44 +563,45 @@ export default function UsagesRoute() {
 						</div>
 					</div>
 
-					<div className="mt-6 rounded-2xl bg-zinc-900 border border-white/[0.08] overflow-hidden">
-						<div className="px-5 py-4 border-b border-white/[0.06]">
-							<div className="text-sm font-semibold text-zinc-100">{t(lang, "analytics.recentRequests")}</div>
-							<div className="text-xs text-zinc-500 mt-1">{t(lang, "analytics.recentRequests.subtitle")}</div>
+					
+					<div className="mt-6 rounded-[var(--radius-xl)] glass overflow-hidden">
+						<div className="px-6 py-5 border-b border-[var(--glass-border)] bg-[var(--glass-bg-subtle)]">
+							<div className="text-base font-bold text-[var(--text-primary)]">{t(lang, "analytics.recentRequests")}</div>
+							<div className="text-sm text-[var(--text-muted)] mt-1">{t(lang, "analytics.recentRequests.subtitle")}</div>
 						</div>
 						<div className="overflow-auto">
 							<table className="min-w-full text-sm">
-								<thead className="text-[11px] uppercase tracking-wide text-zinc-500 bg-zinc-950/40">
+								<thead className="text-[11px] uppercase tracking-wider font-semibold text-[var(--text-tertiary)] bg-[var(--glass-bg-subtle)]">
 									<tr>
-										<th className="text-left px-5 py-3">{t(lang, "analytics.table.time")}</th>
-										<th className="text-left px-5 py-3">{t(lang, "analytics.table.conversation")}</th>
-										<th className="text-left px-5 py-3">{t(lang, "analytics.table.model")}</th>
-										<th className="text-right px-5 py-3">{t(lang, "analytics.table.cost")}</th>
-										<th className="text-right px-5 py-3">{t(lang, "analytics.table.tokens")}</th>
+										<th className="text-left px-6 py-4">{t(lang, "analytics.table.time")}</th>
+										<th className="text-left px-6 py-4">{t(lang, "analytics.table.conversation")}</th>
+										<th className="text-left px-6 py-4">{t(lang, "analytics.table.model")}</th>
+										<th className="text-right px-6 py-4">{t(lang, "analytics.table.cost")}</th>
+										<th className="text-right px-6 py-4">{t(lang, "analytics.table.tokens")}</th>
 									</tr>
 								</thead>
-								<tbody className="divide-y divide-white/[0.06]">
+								<tbody className="divide-y divide-[var(--glass-border)]">
 									{filteredRows.length === 0 ? (
 										<tr>
-											<td className="px-5 py-6 text-zinc-500" colSpan={5}>
+											<td className="px-6 py-8 text-[var(--text-muted)] text-center" colSpan={5}>
 												{t(lang, "common.noData")}
 											</td>
 										</tr>
 									) : (
 										pagedRecent.items.map((r) => (
-											<tr key={`${r.conversationId}:${r.id}`} className="hover:bg-white/[0.02]">
-												<td className="px-5 py-3 text-zinc-300 whitespace-nowrap">{formatDateTime(r.createdAt, lang)}</td>
-												<td className="px-5 py-3 min-w-[220px]">
-													<div className="text-zinc-200 truncate">{r.conversationTitle}</div>
+											<tr key={`${r.conversationId}:${r.id}`} className="hover:bg-[var(--glass-bg-subtle)] transition-colors">
+												<td className="px-6 py-4 text-[var(--text-secondary)] whitespace-nowrap">{formatDateTime(r.createdAt, lang)}</td>
+												<td className="px-6 py-4 min-w-[220px]">
+													<div className="text-[var(--text-primary)] truncate max-w-[200px]">{r.conversationTitle}</div>
 												</td>
-												<td className="px-5 py-3">
-													<div className="text-zinc-200 truncate">{getModelDisplayName(r.modelId)}</div>
-													<div className="text-[11px] text-zinc-500 truncate">{r.modelId}</div>
+												<td className="px-6 py-4">
+													<div className="text-[var(--text-secondary)] truncate">{getModelDisplayName(r.modelId)}</div>
+													<div className="text-[10px] text-[var(--text-muted)] truncate">{r.modelId}</div>
 												</td>
-													<td className="px-5 py-3 text-right text-zinc-200 whitespace-nowrap">{formatMoneyUsd(r.costUsd, lang)}</td>
-												<td className="px-5 py-3 text-right text-zinc-200 whitespace-nowrap">
+												<td className="px-6 py-4 text-right text-[var(--text-primary)] font-medium whitespace-nowrap">{formatMoneyUsd(r.costUsd, lang)}</td>
+												<td className="px-6 py-4 text-right text-[var(--text-secondary)] whitespace-nowrap">
 													{formatInt(r.inTokens + r.outTokens, lang)}
-													<div className="text-[11px] text-zinc-500">{formatInt(r.inTokens, lang)} in • {formatInt(r.outTokens, lang)} out</div>
+													<div className="text-[10px] text-[var(--text-muted)]">{formatInt(r.inTokens, lang)} in • {formatInt(r.outTokens, lang)} out</div>
 												</td>
 											</tr>
 										))
@@ -599,7 +609,7 @@ export default function UsagesRoute() {
 								</tbody>
 							</table>
 						</div>
-						<div className="flex items-center justify-between px-5 py-4 border-t border-white/[0.06] text-xs text-zinc-500">
+						<div className="flex items-center justify-between px-6 py-4 border-t border-[var(--glass-border)] text-xs text-[var(--text-muted)]">
 							<div>
 								{t(lang, "common.page")} {pagedRecent.page}/{pagedRecent.totalPages}
 							</div>
@@ -613,7 +623,7 @@ export default function UsagesRoute() {
 							</div>
 						</div>
 
-						<div className="px-5 py-4 border-t border-white/[0.06] text-xs text-zinc-500">{t(lang, "analytics.note.estimates")}</div>
+						<div className="px-6 py-4 border-t border-[var(--glass-border)] text-xs text-[var(--text-muted)] bg-[var(--glass-bg-subtle)]">{t(lang, "analytics.note.estimates")}</div>
 					</div>
 				</div>
 			</div>

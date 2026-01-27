@@ -26,23 +26,23 @@ function OptionCard({
 			type="button"
 			onClick={onClick}
 			className={[
-				"text-left w-full rounded-xl border p-4 transition-all duration-150",
+				"group text-left w-full rounded-[12px] border p-4 transition-all duration-200",
 				selected
-					? "bg-white/[0.06] border-white/[0.18]"
-					: "bg-white/[0.03] border-white/[0.08] hover:bg-white/[0.05] hover:border-white/[0.12]",
+					? "bg-[var(--accent-cyan-glow)] border-[rgba(0,212,255,0.20)]"
+					: "bg-[rgba(255,255,255,0.02)] border-[var(--glass-border)] hover:bg-[rgba(255,255,255,0.04)] hover:border-[var(--glass-border-hover)]",
 			].join(" ")}
 		>
 			<div className="flex items-start justify-between gap-3">
 				<div>
-					<div className="text-sm font-medium text-zinc-100">{title}</div>
-					<div className="text-xs text-zinc-500 mt-1 leading-relaxed">{description}</div>
+					<div className={`text-[13px] font-medium transition-colors ${selected ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]"}`}>{title}</div>
+					<div className="text-[11px] text-[var(--text-subtle)] mt-1 leading-relaxed">{description}</div>
 				</div>
 				{selected ? (
-					<div className="mt-0.5 w-5 h-5 flex-shrink-0 rounded-full bg-zinc-100 grid place-items-center">
-						<Icons.check className="w-3 h-3 text-zinc-900" />
+					<div className="mt-0.5 w-5 h-5 flex-shrink-0 rounded-full bg-[var(--accent-cyan-glow)] border border-[rgba(0,212,255,0.30)] grid place-items-center">
+						<Icons.check className="w-3 h-3 text-[var(--accent-cyan)]" />
 					</div>
 				) : (
-					<div className="mt-0.5 w-5 h-5 flex-shrink-0 rounded-full border border-white/[0.12]" />
+					<div className="mt-0.5 w-5 h-5 flex-shrink-0 rounded-full border border-[var(--glass-border-hover)] group-hover:border-[rgba(255,255,255,0.20)] transition-colors" />
 				)}
 			</div>
 		</button>
@@ -114,49 +114,48 @@ export function SettingsPanel({ isOpen, onClose }: Props) {
 	];
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center">
-			{/* Backdrop */}
+		<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+			
 			<div 
-				className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+				className="absolute inset-0 bg-[var(--bg-overlay)] backdrop-blur-md animate-fade-in"
 				onClick={onClose}
 			/>
 
-			{/* Panel */}
-			<div className="relative w-full max-w-5xl max-h-[88vh] mx-4 rounded-2xl bg-zinc-900 border border-white/[0.08] shadow-2xl shadow-black/50 animate-in zoom-in-95 fade-in duration-300 overflow-hidden flex flex-col">
-				{/* Header */}
-				<div className="flex-shrink-0 flex items-center justify-between p-6 border-b border-white/[0.06]">
-					<div className="flex items-center gap-3">
-						<div className="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center">
-							<Icons.settings className="w-5 h-5 text-zinc-200" />
+			
+			<div className="relative w-full max-w-5xl max-h-[88vh] rounded-[var(--radius-2xl)] glass-strong shadow-[var(--shadow-xl)] animate-scale-in overflow-hidden flex flex-col">
+				
+				<div className="flex-shrink-0 flex items-center justify-between p-6 border-b border-[var(--glass-border)] bg-[rgba(255,255,255,0.02)]">
+					<div className="flex items-center gap-4">
+						<div className="w-12 h-12 rounded-[var(--radius-xl)] bg-[rgba(255,255,255,0.04)] border border-[var(--glass-border)] flex items-center justify-center">
+							<Icons.settings className="w-6 h-6 text-[var(--text-primary)]" />
 						</div>
 						<div>
-							<h2 className="text-lg font-semibold text-zinc-100">{t(lang, "settings.title")}</h2>
-							<p className="text-xs text-zinc-500">{t(lang, "settings.subtitle")}</p>
+							<h2 className="text-[18px] font-bold text-[var(--text-primary)]">{t(lang, "settings.title")}</h2>
+							<p className="text-[13px] text-[var(--text-subtle)] mt-0.5">{t(lang, "settings.subtitle")}</p>
 						</div>
 					</div>
-					<Button
-						variant="ghost"
-						size="icon"
+					<button
 						onClick={onClose}
-						className="text-zinc-400 hover:text-zinc-100"
+						className="w-10 h-10 rounded-[var(--radius-lg)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[rgba(255,255,255,0.06)] transition-all duration-200"
 					>
 						<Icons.close className="w-5 h-5" />
-					</Button>
+					</button>
 				</div>
 
-				{/* Content */}
-				<div className="flex-1 overflow-auto p-6">
-					<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-						{/* Personality */}
-						<div className="space-y-5">
-							<div className="flex items-start justify-between gap-4 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+				
+				<div className="flex-1 overflow-auto p-6 scrollbar-premium">
+					<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+						
+						<div className="space-y-6">
+							
+							<div className="flex items-start justify-between gap-4 p-5 rounded-[var(--radius-xl)] bg-[rgba(255,255,255,0.02)] border border-[var(--glass-border)]">
 								<div>
-									<h3 className="text-sm font-semibold text-zinc-100">{t(lang, "settings.language")}</h3>
-									<p className="text-xs text-zinc-500 mt-1">
+									<h3 className="text-[13px] font-semibold text-[var(--text-primary)]">{t(lang, "settings.language")}</h3>
+									<p className="text-[11px] text-[var(--text-subtle)] mt-1">
 										{t(lang, "settings.language.defaultHint")}
 									</p>
 								</div>
-								<div className="flex items-center gap-1">
+								<div className="flex items-center p-0.5 rounded-[var(--radius-lg)] bg-[rgba(255,255,255,0.04)] border border-[var(--glass-border)]">
 									{UI_LANGUAGES.map((l) => (
 										<button
 											key={l}
@@ -165,11 +164,11 @@ export function SettingsPanel({ isOpen, onClose }: Props) {
 												updateSettings({ uiLanguage: l });
 											}}
 											className={[
-											"h-8 px-3 rounded-lg text-[11px] border transition-colors",
-											lang === l
-												? "bg-white/[0.12] border-white/[0.20] text-zinc-100"
-												: "bg-transparent border-white/[0.08] text-zinc-400 hover:bg-white/[0.06] hover:text-zinc-200",
-										].join(" ")}
+												"h-8 px-4 rounded-[var(--radius-sm)] text-[11px] font-semibold transition-all duration-200",
+												lang === l
+													? "bg-[rgba(255,255,255,0.08)] text-[var(--text-primary)]"
+													: "text-[var(--text-muted)] hover:text-[var(--text-primary)]",
+											].join(" ")}
 										>
 											{l.toUpperCase()}
 										</button>
@@ -177,14 +176,16 @@ export function SettingsPanel({ isOpen, onClose }: Props) {
 								</div>
 							</div>
 
+							
 							<div>
-								<h3 className="text-sm font-semibold text-zinc-100">{t(lang, "settings.personality")}</h3>
-								<p className="text-xs text-zinc-500 mt-1">{t(lang, "settings.personality.help")}</p>
+<h3 className="text-[15px] font-bold text-[var(--text-primary)]">{t(lang, "settings.personality")}</h3>
+									<p className="text-[13px] text-[var(--text-muted)] mt-1">{t(lang, "settings.personality.help")}</p>
 							</div>
 
-							<div className="space-y-2">
-								<div className="text-xs font-medium text-zinc-300">{t(lang, "settings.tone")}</div>
-								<div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+							
+							<div className="space-y-3">
+								<div className="text-[10px] font-semibold text-[var(--text-subtle)] uppercase tracking-wider">{t(lang, "settings.tone")}</div>
+								<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 									{toneOptions.map((opt) => (
 										<OptionCard
 											key={opt.id}
@@ -199,9 +200,10 @@ export function SettingsPanel({ isOpen, onClose }: Props) {
 								</div>
 							</div>
 
-							<div className="space-y-2">
-								<div className="text-xs font-medium text-zinc-300">{t(lang, "settings.verbosity")}</div>
-								<div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+							
+							<div className="space-y-3">
+								<div className="text-[10px] font-semibold text-[var(--text-subtle)] uppercase tracking-wider">{t(lang, "settings.verbosity")}</div>
+								<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 									{verbosityOptions.map((opt) => (
 										<OptionCard
 											key={opt.id}
@@ -216,9 +218,10 @@ export function SettingsPanel({ isOpen, onClose }: Props) {
 								</div>
 							</div>
 
-							<div className="space-y-2">
-								<div className="text-xs font-medium text-zinc-300">{t(lang, "settings.guidance")}</div>
-								<div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+							
+							<div className="space-y-3">
+								<div className="text-[10px] font-semibold text-[var(--text-subtle)] uppercase tracking-wider">{t(lang, "settings.guidance")}</div>
+								<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 									{guidanceOptions.map((opt) => (
 										<OptionCard
 											key={opt.id}
@@ -233,9 +236,10 @@ export function SettingsPanel({ isOpen, onClose }: Props) {
 								</div>
 							</div>
 
-							<div className="space-y-2">
-								<div className="text-xs font-medium text-zinc-300">{t(lang, "settings.playfulness")}</div>
-								<div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+							
+							<div className="space-y-3">
+								<div className="text-[10px] font-semibold text-[var(--text-subtle)] uppercase tracking-wider">{t(lang, "settings.playfulness")}</div>
+								<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 									{playfulOptions.map((opt) => (
 										<OptionCard
 											key={opt.id}
@@ -251,58 +255,59 @@ export function SettingsPanel({ isOpen, onClose }: Props) {
 							</div>
 						</div>
 
-						{/* Instructions */}
-						<div className="space-y-4">
+						
+						<div className="space-y-5">
 							<div className="flex items-start justify-between gap-4">
 								<div>
-									<h3 className="text-sm font-semibold text-zinc-100">{t(lang, "settings.instructions")}</h3>
-									<p className="text-xs text-zinc-500 mt-1 leading-relaxed">
+									<h3 className="text-[15px] font-bold text-[var(--text-primary)]">{t(lang, "settings.instructions")}</h3>
+									<p className="text-[13px] text-[var(--text-muted)] mt-1 leading-relaxed">
 										{t(lang, "settings.instructions.help")}
-								</p>
+									</p>
 								</div>
-								<Button
-									variant="ghost"
-									size="xs"
+								<button
 									onClick={handleReset}
-									className="flex-shrink-0 text-zinc-500 hover:text-zinc-300"
+									className="flex-shrink-0 px-3 py-1.5 rounded-[var(--radius-lg)] text-[12px] font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[rgba(255,255,255,0.06)] transition-all duration-200"
 									disabled={loading}
 								>
 									{t(lang, "settings.reset")}
-								</Button>
+								</button>
 							</div>
 
 							<TextArea
 								value={customInstructions}
 								onChange={(e) => setCustomInstructions(e.target.value)}
-								className="min-h-[340px] font-mono text-xs leading-relaxed"
+								className="min-h-[320px] font-mono text-[12px] leading-relaxed rounded-[var(--radius-xl)] bg-[rgba(0,0,0,0.3)] border-[var(--glass-border)] focus:border-[rgba(0,212,255,0.25)] focus:ring-2 focus:ring-[var(--accent-cyan-glow)]"
 								placeholder={t(lang, "settings.instructions.placeholder.panel")}
 								disabled={loading}
 							/>
 
 							<div className="flex items-center justify-between gap-3">
-								<div className="text-xs text-zinc-500">
+								<div className="text-[11px] text-[var(--text-subtle)]">
 									{t(lang, "settings.instructions.alwaysActive")}{" "}
-									<span className="text-zinc-300">{t(lang, "settings.instructions.alwaysActiveItems")}</span>
+									<span className="text-[var(--text-secondary)]">{t(lang, "settings.instructions.alwaysActiveItems")}</span>
 								</div>
-								{error ? <div className="text-xs text-red-300">{error}</div> : null}
+								{error ? <div className="text-[11px] text-[var(--accent-red)]">{error}</div> : null}
 							</div>
 
-							<div className="flex gap-3 p-4 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-								<Icons.sparkles className="w-5 h-5 text-zinc-400 flex-shrink-0 mt-0.5" />
-								<div className="text-xs text-zinc-400 leading-relaxed">
-									<p className="font-medium text-zinc-200 mb-1">{t(lang, "settings.instructions.noteTitle")}</p>
-									<p>
+							
+<div className="flex gap-4 p-5 rounded-[var(--radius-xl)] bg-[rgba(255,255,255,0.02)] border border-[var(--glass-border)]">
+									<div className="w-10 h-10 rounded-[var(--radius-lg)] bg-[rgba(255,255,255,0.04)] border border-[var(--glass-border)] flex items-center justify-center flex-shrink-0">
+										<Icons.sparkles className="w-5 h-5 text-[var(--text-secondary)]" />
+									</div>
+									<div className="text-[13px] text-[var(--text-muted)] leading-relaxed">
+										<p className="font-semibold text-[var(--text-primary)] mb-1">{t(lang, "settings.instructions.noteTitle")}</p>
+									<p className="text-[11px]">
 										{t(lang, "settings.instructions.noteBody", { filePath: "src/instructions/DEFAULT_GREG_INSTRUCTIONS.md" })}
 									</p>
 								</div>
 							</div>
 
-							{/* Data / archive */}
-							<div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-								<div className="flex items-start justify-between gap-4">
-									<div>
-										<h3 className="text-sm font-semibold text-zinc-100">{t(lang, "settings.data.title")}</h3>
-										<p className="text-xs text-zinc-500 mt-1">{t(lang, "settings.data.subtitle")}</p>
+							
+<div className="p-5 rounded-[var(--radius-xl)] bg-[var(--accent-red-glow)] border border-[rgba(255,69,58,0.15)]">
+									<div className="flex items-start justify-between gap-4">
+										<div>
+											<h3 className="text-[13px] font-semibold text-[var(--text-primary)]">{t(lang, "settings.data.title")}</h3>
+											<p className="text-[11px] text-[var(--text-subtle)] mt-1">{t(lang, "settings.data.subtitle")}</p>
 									</div>
 									<Button
 										variant="danger"
@@ -314,17 +319,17 @@ export function SettingsPanel({ isOpen, onClose }: Props) {
 										{t(lang, "actions.deleteAll")}
 									</Button>
 								</div>
-								<p className="text-xs text-zinc-500 mt-3 leading-relaxed">{t(lang, "settings.archiveAll.help")}</p>
+								<p className="text-[11px] text-[var(--text-subtle)] mt-3 leading-relaxed">{t(lang, "settings.archiveAll.help")}</p>
 							</div>
 						</div>
 					</div>
 				</div>
 
-				{/* Footer */}
-				<div className="flex-shrink-0 flex items-center justify-between gap-3 p-6 border-t border-white/[0.06] bg-zinc-950/50">
+				
+				<div className="flex-shrink-0 flex items-center justify-between gap-3 p-6 border-t border-[var(--glass-border)] bg-[rgba(255,255,255,0.02)]">
 					<div className="flex items-center gap-2">
 						{saved && (
-							<div className="flex items-center gap-2 text-zinc-300 text-sm animate-in fade-in duration-200">
+							<div className="flex items-center gap-2 px-3 py-1.5 rounded-[var(--radius-lg)] bg-[var(--accent-green-glow)] border border-[rgba(52,199,89,0.20)] text-[var(--accent-green)] text-[12px] font-medium animate-fade-in">
 								<Icons.check className="w-4 h-4" />
 								{t(lang, "status.saved.long")}
 							</div>
@@ -341,21 +346,21 @@ export function SettingsPanel({ isOpen, onClose }: Props) {
 				</div>
 			</div>
 
-			{/* Confirm archive all modal */}
+			
 			{confirmArchiveAllOpen && (
-				<div className="absolute inset-0 z-10 flex items-center justify-center">
+				<div className="absolute inset-0 z-10 flex items-center justify-center p-4">
 					<div
-						className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+						className="absolute inset-0 bg-[var(--bg-overlay)] backdrop-blur-sm"
 						onClick={() => setConfirmArchiveAllOpen(false)}
 					/>
-					<div className="relative w-full max-w-md mx-4 rounded-2xl bg-zinc-950 border border-white/[0.08] shadow-2xl p-6">
-						<div className="flex items-start gap-3">
-							<div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
-								<Icons.trash className="w-5 h-5 text-red-300" />
+					<div className="relative w-full max-w-md rounded-[var(--radius-2xl)] glass-strong border-[rgba(255,69,58,0.20)] shadow-[var(--shadow-xl)] p-6 animate-scale-in">
+						<div className="flex items-start gap-4">
+							<div className="w-12 h-12 rounded-[var(--radius-xl)] bg-[var(--accent-red-glow)] border border-[rgba(255,69,58,0.25)] flex items-center justify-center flex-shrink-0">
+								<Icons.trash className="w-6 h-6 text-[var(--accent-red)]" />
 							</div>
 							<div>
-								<div className="text-sm font-semibold text-zinc-100">{t(lang, "settings.archiveAll.confirmTitle")}</div>
-								<div className="text-xs text-zinc-500 mt-1 leading-relaxed">{t(lang, "settings.archiveAll.confirmBody")}</div>
+								<div className="text-[15px] font-bold text-[var(--text-primary)]">{t(lang, "settings.archiveAll.confirmTitle")}</div>
+								<div className="text-[13px] text-[var(--text-muted)] mt-2 leading-relaxed">{t(lang, "settings.archiveAll.confirmBody")}</div>
 							</div>
 						</div>
 						<div className="flex items-center justify-end gap-3 mt-6">

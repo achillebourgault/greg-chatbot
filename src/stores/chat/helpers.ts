@@ -119,6 +119,7 @@ export function normalizeConversationTitle(title: string): string {
 
 export function sanitizeAssistantContent(content: string): string {
 	let out = content ?? "";
+	out = out.replaceAll("\r\n", "\n");
 	// Never display conversation title tags in the chat bubble (they are parsed separately).
 	out = out.replace(/<greg_title>[\s\S]*?<\/greg_title>/gi, "");
 
@@ -133,6 +134,40 @@ export function sanitizeAssistantContent(content: string): string {
 	// Remove legacy hardcoded intros from older sessions (sometimes inserted mid-message).
 	out = out.replace(/\bOuais c['’]est Greg\.?\b/gi, "");
 	out = out.replace(/\bYeah it\s*['’]?s Greg\.?\b/gi, "");
+
+	// If a response got duplicated back-to-back (common streaming edge case), keep only one copy.
+	// Heuristic: exact match on halves (lines or paragraphs). Avoid fancy fuzzy matching to reduce false positives.
+	{
+		const trimmed = out.trim();
+		if (trimmed.length >= 200) {
+			const normalizeLines = (xs: string[]) => xs.map((x) => x.replace(/[\t ]+$/g, ""));
+			const lines = normalizeLines(trimmed.split("\n"));
+			if (lines.length >= 8 && lines.length % 2 === 0) {
+				const half = lines.length / 2;
+				let same = true;
+				for (let i = 0; i < half; i++) {
+					if (lines[i] !== lines[i + half]) {
+						same = false;
+						break;
+					}
+				}
+				if (same) out = lines.slice(0, half).join("\n");
+			} else {
+				const paras = trimmed.split(/\n{2,}/g).map((p) => p.trim());
+				if (paras.length >= 6 && paras.length % 2 === 0) {
+					const half = paras.length / 2;
+					let same = true;
+					for (let i = 0; i < half; i++) {
+						if (paras[i] !== paras[i + half]) {
+							same = false;
+							break;
+						}
+					}
+					if (same) out = paras.slice(0, half).join("\n\n");
+				}
+			}
+		}
+	}
 	// Clean up leftover spacing (preserve newlines so Markdown keeps working)
 	out = out.replace(/[\t ]{2,}/g, " ").replace(/\n{3,}/g, "\n\n");
 

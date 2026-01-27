@@ -48,28 +48,28 @@ export function ImageGallery({ urls, title }: { urls: string[]; title?: string }
 	if (visibleImages.length === 0) return null;
 
 	return (
-		<div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3">
+		<div className="rounded-[var(--radius-xl)] border border-[var(--glass-border)] bg-[var(--glass-bg-subtle)] p-4">
 			<div className="flex items-center justify-between gap-2">
-				<div className="text-xs text-zinc-400">
+				<div className="text-xs font-medium text-[var(--text-tertiary)]">
 					{title ?? (images.length === 1 ? "Image" : `Galerie (${images.length})`)}
 				</div>
 			</div>
 
-			<div className="mt-2 grid grid-cols-2 gap-2 md:grid-cols-3">
+			<div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-3">
 				{visibleImages.map((url) => {
 					const external = isExternalUrl(url);
 					return (
 						<button
 							key={url}
 							type="button"
-							className="group/image relative overflow-hidden rounded-xl border border-white/[0.06] bg-zinc-950/30 focus:outline-none focus:ring-2 focus:ring-emerald-400/40"
+							className="group/image relative overflow-hidden rounded-[var(--radius-lg)] border border-[var(--glass-border)] bg-[var(--bg-base)]/50 focus:outline-none focus:ring-2 focus:ring-[var(--glass-border-hover)] hover:border-[var(--glass-border-hover)] transition-colors duration-200"
 							onClick={() => setOpenUrl(url)}
 						>
 							<img
 								src={proxiedImageUrl(url)}
 								alt=""
 								loading="lazy"
-								className="h-36 w-full object-cover transition duration-200 group-hover/image:scale-[1.02]"
+								className="h-36 w-full object-cover transition duration-300 group-hover/image:scale-105"
 								onError={(e) => {
 									const markFailed = () =>
 										setFailedUrls((prev) => {
@@ -91,9 +91,12 @@ export function ImageGallery({ urls, title }: { urls: string[]; title?: string }
 									markFailed();
 								}}
 							/>
-							<div className="pointer-events-none absolute inset-0 opacity-0 transition group-hover/image:opacity-100">
-								<div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
-								<div className="absolute bottom-2 left-2 text-[11px] text-white/85">Agrandir</div>
+							<div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover/image:opacity-100">
+								<div className="absolute inset-0 bg-black/55" />
+								<div className="absolute bottom-2 left-2 flex items-center gap-1.5 text-[11px] font-medium text-[var(--text-primary)] opacity-90">
+									<svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
+									Agrandir
+								</div>
 							</div>
 						</button>
 					);
@@ -104,25 +107,26 @@ export function ImageGallery({ urls, title }: { urls: string[]; title?: string }
 				? createPortal(
 					<div className="fixed inset-0 z-[999] flex items-center justify-center p-4 md:p-8" role="dialog" aria-modal="true">
 						<div
-							className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+							className="absolute inset-0 bg-black/85 backdrop-blur-md"
 							onClick={() => setOpenUrl(null)}
 						/>
-						<div className="relative w-full max-w-5xl max-h-[85vh] overflow-hidden rounded-2xl border border-white/[0.10] bg-zinc-950/90 shadow-2xl">
-							<div className="flex items-center justify-between gap-3 border-b border-white/[0.08] bg-zinc-950/70 px-4 py-3">
-								<div className="min-w-0 text-xs text-zinc-300 truncate">{openUrl}</div>
-								<button
-									type="button"
-									className="text-xs text-zinc-200 hover:text-white"
-									onClick={() => setOpenUrl(null)}
-								>
-									Fermer (Esc)
+					<div className="relative w-full max-w-5xl max-h-[85vh] overflow-hidden rounded-[var(--radius-xl)] border border-[var(--glass-border-hover)] bg-[var(--bg-base)]/95 shadow-2xl shadow-black/40">
+						<div className="flex items-center justify-between gap-3 border-b border-[var(--glass-border)] bg-[var(--glass-bg-subtle)] px-5 py-4">
+							<div className="min-w-0 text-xs text-[var(--text-tertiary)] truncate">{openUrl}</div>
+							<button
+								type="button"
+								className="flex items-center gap-2 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors px-3 py-1.5 rounded-[var(--radius-md)] hover:bg-[var(--glass-bg)]"
+								onClick={() => setOpenUrl(null)}
+							>
+								<span>Fermer</span>
+								<kbd className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--glass-bg)] text-[var(--text-tertiary)]">Esc</kbd>
 								</button>
 							</div>
 							<div className="p-4 md:p-6 overflow-auto">
 								<img
 									src={proxiedImageUrl(openUrl)}
 									alt=""
-									className="w-full max-h-[72vh] object-contain"
+									className="w-full max-h-[72vh] object-contain rounded-[var(--radius-lg)]"
 									onError={(e) => {
 										if (!isExternalUrl(openUrl)) {
 											setFailedUrls((prev) => {

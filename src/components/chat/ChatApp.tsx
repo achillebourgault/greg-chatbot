@@ -188,23 +188,23 @@ function ChatAppInner() {
 	);
 
 	return (
-		<div className="flex h-screen w-screen overflow-hidden bg-zinc-950">
+		<div className="flex h-screen w-screen overflow-hidden bg-[var(--bg-base)]">
 			<HtmlLangSync lang={lang} />
-			{/* Sidebar */}
+			
 			<Sidebar />
 
-			{/* Main content */}
+			
 			<main className="relative flex h-full flex-1 flex-col min-w-0">
-				{/* Top bar */}
-				<header className="flex-shrink-0 flex items-center justify-between px-5 py-3 bg-zinc-950/70 backdrop-blur supports-[backdrop-filter]:bg-zinc-950/60">
+				
+				<header className="flex-shrink-0 flex items-center justify-between px-5 py-3 bg-[var(--bg-base)]/70 backdrop-blur supports-[backdrop-filter]:bg-[var(--bg-base)]/60">
 					<div className="flex items-center gap-3">
-						{/* Mobile menu button */}
+						
 						{!state.sidebarOpen && (
 							<Button
 								variant="ghost"
 								size="icon"
 								onClick={toggleSidebar}
-								className="text-zinc-500 hover:text-zinc-100"
+								className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
 							>
 								<Icons.menu className="w-5 h-5" />
 							</Button>
@@ -213,7 +213,7 @@ function ChatAppInner() {
 						<div className="flex items-center gap-3">
 							<ProviderStack conversation={active} />
 							<div className="min-w-0">
-								<h1 className="text-sm font-medium text-zinc-100 truncate">
+								<h1 className="text-sm font-medium text-[var(--text-primary)] truncate">
 									{active.title}
 								</h1>
 							</div>
@@ -227,7 +227,7 @@ function ChatAppInner() {
 							disabled={state.isStreaming}
 							onClick={() => void onExportConversation()}
 							title={t(lang, "actions.exportChat")}
-							className="text-zinc-500 hover:text-zinc-100"
+							className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
 						>
 							{copied ? <Icons.check className="w-4 h-4" /> : <Icons.copy className="w-4 h-4" />}
 						</Button>
@@ -235,20 +235,20 @@ function ChatAppInner() {
 							variant="ghost"
 							size="icon"
 							onClick={() => router.push("/settings")}
-							className="text-zinc-500 hover:text-zinc-100"
+							className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
 						>
 							<Icons.settings className="w-4 h-4" />
 						</Button>
 					</div>
 				</header>
 
-				{/* Chat area */}
+				
 				<ChatThread
 					briefStatusText={briefTaskStatus}
 					detailedStatusText={detailedTaskStatus}
 				/>
 
-				{/* Composer */}
+				
 				<Composer
 					disabled={false}
 					isStreaming={state.isStreaming}
