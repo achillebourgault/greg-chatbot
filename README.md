@@ -1,44 +1,49 @@
 # Greg Chatbot
-## MCP: URL Analyzer
-
-This repo includes a small MCP server that can **fetch and analyze any URL** (HTML extraction + metadata + headings + links). It does not depend on any AI model.
-
-- Start the MCP server (stdio transport):
-	- `npm run mcp:analyze-url`
-
-- Debug it without an MCP client (prints JSON to stdout):
-	- `npm run url:analyze -- https://example.com`
-
 
 Chat UI inspired by Ollama, powered by OpenRouter (OpenAI-compatible API) with streaming responses.
 
+This repo also includes a small MCP server that can **fetch and analyze any URL** (HTML extraction + metadata + headings + links). The MCP server does not depend on any AI model.
+
 ## Setup
 
-1) Install deps
+Install dependencies:
 
 ```bash
 npm install
 ```
 
-2) Configure env
+Create `.env.local` from `.env.example` (then edit it):
 
-Create `.env.local` from `.env.example`:
-
-```bash
-copy .env.example .env.local
+```powershell
+Copy-Item .env.example .env.local
 ```
 
-Fill `OPENROUTER_API_KEY`.
-
-## Run
+Run:
 
 ```bash
 npm run dev
 ```
 
-Open http://localhost:3000
+## Environment variables
+
+Create `.env.local` by copying `.env.example`, then edit values.
+
+Only the variables below are read by the codebase:
+
+- `OPENROUTER_API_KEY`: OpenRouter API key
+- `OPENROUTER_SITE_URL`: forwarded to OpenRouter as `HTTP-Referer`
+- `OPENROUTER_APP_NAME`: forwarded to OpenRouter as `X-Title`
+- `GREG_MAX_TOOL_CALLS`: maximum number of web-search tool calls per request
+- `GREG_ENABLE_LOGS`: enables/disables conversation logs
+- `GREG_LOG_DIR`: directory where JSONL logs are written
+- `GREG_DEBUG_CONTEXT`: enables `POST /api/debug/context` in production
 
 ## API
 
 - `GET /api/openrouter/models` lists available models
 - `POST /api/openrouter/chat` streams chat completions (SSE)
+
+## MCP: URL Analyzer
+
+- Start the MCP server (stdio transport): `npm run mcp:analyze-url`
+- Debug without an MCP client (prints JSON to stdout): `npm run url:analyze -- https://example.com`

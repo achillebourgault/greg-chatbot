@@ -122,8 +122,12 @@ type DuckDuckGoDateFilter = "d" | "w" | "m" | "y";
 function inferDuckDuckGoDateFilter(query: string): DuckDuckGoDateFilter | null {
 	const q = (query ?? "").toLowerCase();
 	if (!q.trim()) return null;
+	// Strong "today" signals => day filter.
+	if (/\b(today|aujourd(?:'|’)?hui|ce\s+jour|maintenant)\b/i.test(q)) {
+		return "d";
+	}
 	// Only apply to clearly recency-driven queries.
-	if (/\b(today|aujourd|latest|recent|news|actu\w{0,10}|dern(i[èe]re|ier|iers|i[eè]res)|mise\s+à\s+jour|update|yesterday|hier)\b/i.test(q)) {
+	if (/\b(latest|new(est)?|recent|news|actu\w{0,10}|actualit[ée]s?|r[ée]cent(e|es)?|r[ée]cemment|nouveau(x)?|nouveaut[ée]s?|dern(i[èe]re|ier|iers|i[eè]res)|mise\s+à\s+jour|update|yesterday|hier)\b/i.test(q)) {
 		return "w";
 	}
 	// If the query explicitly mentions a year, keep a wider window.

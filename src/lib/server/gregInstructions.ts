@@ -14,6 +14,7 @@ export type GregPersonality = {
 };
 
 const DEFAULT_FILE = "src/instructions/DEFAULT_GREG_INSTRUCTIONS.md";
+const PROJECT_CONTEXT_FILE = "src/instructions/PROJECT_CONTEXT.md";
 
 function cwdPath(file: string) {
 	return path.join(process.cwd(), file);
@@ -86,6 +87,7 @@ export async function buildSystemPrompt(args: {
 	const runtimeBlock = `## Runtime context\n- Current date: ${now.toISOString().slice(0, 10)}\n- Current datetime (UTC): ${now.toISOString()}`;
 
 	const defaultInstructions = await getDefaultInstructions();
+	const projectContext = (await readTextIfExists(cwdPath(PROJECT_CONTEXT_FILE))) ?? "";
 	const custom = (args.customInstructions ?? "").trim();
 	// Be resilient: clients may send partial personality objects (older localStorage, older UI).
 	// Merge with defaults so style settings always apply deterministically.
@@ -99,7 +101,11 @@ export async function buildSystemPrompt(args: {
 	].join("\n");
 
 	const personalityBlock = `## Personality (user settings)\n${personalityInstruction(personality)}`;
-	const mandatoryBase = defaultInstructions.replaceAll("{{MODEL_NAME}}", args.model).trim();
+	const mandatoryBase = [defaultInstructions, projectContext]
+		.filter((x) => (x ?? "").trim().length > 0)
+		.join("\n\n")
+		.replaceAll("{{MODEL_NAME}}", args.model)
+		.trim();
 
 	const userCustomBlock = custom.length
 		? `## Custom instructions (user-defined)\n${custom}`

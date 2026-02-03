@@ -130,6 +130,12 @@ export function sanitizeAssistantContent(content: string): string {
 	out = out.replace(/<search_web\b[^>]*\/\s*>/gi, "");
 	out = out.replace(/<search_web\b[^>]*>/gi, "");
 	out = out.replace(/<internal_sources>[\s\S]*?<\/internal_sources>/gi, "");
+	// Strip common web-search dump headings if they leak without tags.
+	out = out.replace(/^\s*##\s*Web search results \(server-extracted\)\s*$/gim, "");
+	out = out.replace(/^\s*(Query|Fetched at|Rules|Results)\s*:\s*.*$/gim, "");
+	out = out.replace(/^\s*-\s+Treat these results as the only verified external references available\.?\s*$/gim, "");
+	out = out.replace(/^\s*-\s+Prefer the most relevant results first[\s\S]*$/gim, "");
+	out = out.replace(/^\s*-\s+You may list these URLs\.[\s\S]*$/gim, "");
 
 	// Remove legacy hardcoded intros from older sessions (sometimes inserted mid-message).
 	out = out.replace(/\bOuais c['’]est Greg\.?\b/gi, "");

@@ -76,7 +76,7 @@ export async function postChat(req: Request) {
 
 				// Generic fallback: for time-sensitive requests, force a web search without assuming any specific site.
 				// Note: include common FR patterns like opening hours and "demain" (tomorrow).
-				const looksTimeSensitive = /\b(latest|current|today|tomorrow|demain|news|aujourd|actu\w{0,10}|actuel\w{0,10}|dern(i[èe]re|ier|iers|i[eè]res)|mise\s+à\s+jour|update|horaire(s)?|heures?|opening\s+hours|open\b|close\b|stock|share\s+price|cours\b|bourse)\b/i.test(
+				const looksTimeSensitive = /\b(latest|new(est)?|current|today|tomorrow|demain|news|aujourd|actu\w{0,10}|actualit[ée]s?|actuel\w{0,10}|en\s+ce\s+moment|actuellement|r[ée]cent(e|es)?|r[ée]cemment|nouveau(x)?|nouveaut[ée]s?|dern(i[èe]re|ier|iers|i[eè]res)|mise\s+à\s+jour|update|horaire(s)?|heures?|opening\s+hours|open\b|close\b|stock|share\s+price|cours\b|bourse)\b/i.test(
 					raw,
 				);
 				const looksLikeListings = /\b(offre(s)?\s+d[' ]emploi|offre(s)?\s+emploi|emploi(s)?|job(s)?|recrut(e|ement|er|ing)|hiring|vacanc(y|ies)|annonce(s)?|poste(s)?|post[ée]e?s?\s+r[ée]cemment|recent(ly)?\s+posted)\b/i.test(
@@ -222,8 +222,9 @@ export async function postChat(req: Request) {
 			};
 
 			const buildFallbackSearchQueryFromIntent = (toolQuery: string) => {
-				// Prefer the real user intent over model-emitted fragments.
-				const intent = normalizeSearchQuery(combinedUserIntent || lastUserMessage || "");
+				// Prefer the effective user intent over model-emitted fragments.
+				// (Using combined history too aggressively can poison the query.)
+				const intent = normalizeSearchQuery(lastUserMessage || combinedUserIntent || "");
 				if (intent && intent.length >= 12) return intent;
 				return normalizeSearchQuery(toolQuery);
 			};
@@ -234,7 +235,7 @@ export async function postChat(req: Request) {
 				// Fast heuristic: only pay the extra gatekeeper model call when the user
 				// explicitly asks for web verification / current info / sources.
 				const hints =
-					/(\bsource(s)?\b|\bliens?\b|\burl\b|\binternet\b|\bweb\b|\bgoogle\b|\bsearch\b|\brecherche\b|\bv[ée]rifie\b|\bverify\b|\bfact[-\s]?check\b|\bactu\w{0,10}\b|\bactuel\w{0,10}\b|\baujourd\b|\btoday\b|\blatest\b|\bcurrent\b|\bnews\b|\bdemain\b|\bhoraires?\b|\bheures?\b|\bouvert(e)?\b|\bouvre\b|\bferme\b|\bopening\s+hours\b|\bopen\b|\bclose\b|\bprix\b|\btarif\b|\bprice\b|\bcours\b|\bbourse\b|\bstock\b|\bshare\s+price\b|\baction\b|\brelease\b|\bsorti\b|\bdern(i[èe]re|ier|iers|i[eè]res)\b|\bqui est\b|\bwho is\b|\bbiograph\w*\b|\bimage(s)?\b|\bphoto(s)?\b|\bscreenshot(s)?\b|\bcapture\s*d[' ]\s*[eé]cran\b|\bwallpaper(s)?\b)/;
+					/(\bsource(s)?\b|\bliens?\b|\burl\b|\binternet\b|\bweb\b|\bgoogle\b|\bsearch\b|\brecherche\b|\bv[ée]rifie\b|\bverify\b|\bfact[-\s]?check\b|\bactu\w{0,10}\b|\bactualit[ée]s?\b|\bactuel\w{0,10}\b|\ben\s+ce\s+moment\b|\bactuellement\b|\baujourd\b|\btoday\b|\blatest\b|\bnew(est)?\b|\bcurrent\b|\bnews\b|\br[ée]cent(e|es)?\b|\br[ée]cemment\b|\bnouveau(x)?\b|\bnouveaut[ée]s?\b|\bdemain\b|\bhoraires?\b|\bheures?\b|\bouvert(e)?\b|\bouvre\b|\bferme\b|\bopening\s+hours\b|\bopen\b|\bclose\b|\bprix\b|\btarif\b|\bprice\b|\bcours\b|\bbourse\b|\bstock\b|\bshare\s+price\b|\baction\b|\brelease\b|\bsorti\b|\bdern(i[èe]re|ier|iers|i[eè]res)\b|\bqui est\b|\bwho is\b|\bbiograph\w*\b|\bimage(s)?\b|\bphoto(s)?\b|\bscreenshot(s)?\b|\bcapture\s*d[' ]\s*[eé]cran\b|\bwallpaper(s)?\b)/;
 				if (hints.test(t)) return true;
 				// If the UI language is French, treat "stp"/"svp" etc as non-hints.
 				void uiLanguage;
@@ -276,10 +277,10 @@ export async function postChat(req: Request) {
 				lines.push("- Treat these results as the only verified external references available.");
 				lines.push("- Prefer the most relevant results first; if recency matters, prefer the most recent-looking result (e.g., mentions of this year, 'days ago', etc.).");
 				lines.push("- You may list these URLs. Do not invent job details not present in titles/snippets.");
-				lines.push("- In the final answer, include a short Sources section with the relevant URL(s).");
+				lines.push("- In the final answer, include a short Sources section with ONLY relevant URL(s) (no snippets, no raw dump).");
 				lines.push("- Never copy/paste this block verbatim into the final answer; it is internal context.");
 				lines.push("Results:");
-				for (const r of args.results.slice(0, 12)) {
+				for (const r of args.results.slice(0, 10)) {
 					const title = (r.title ?? "").trim();
 					const snippet = (r.snippet ?? "").trim();
 					const titlePart = title ? `${title} — ` : "";
@@ -554,7 +555,7 @@ export async function postChat(req: Request) {
 							fetchedAt: lastSearch?.fetchedAt || new Date().toISOString(),
 							reason: lastSearch?.debug?.html?.blocked ? "blocked" : "no_results",
 						});
-						urlContext = `${urlContext}\n\n## Next step\n- Answer now without claiming web verification.\n- If the user needs current data, ask them for a direct link.\n- Do NOT output <search_web .../>.`;
+						urlContext = `${urlContext}\n\n## Next step\n- Answer now without claiming web verification.\n- If the user needs current data, request a direct link OR emit exactly one <search_web query=\"...\" /> and stop.`;
 						await sse.writeStatus(PHASE_WRITE, "detailed");
 					}
 				}
@@ -608,7 +609,7 @@ export async function postChat(req: Request) {
 						fetchedAt: lastSearch.fetchedAt,
 						results: lastSearch.results,
 					});
-					urlContext = `${urlContext}\n\n## Next step\n- Use ONLY the results above.\n- Provide up to 10 relevant links (titles if present).\n- You may briefly say you checked the most recent available information.\n- Do NOT output <search_web .../>. Answer now.`;
+					urlContext = `${urlContext}\n\n## Next step\n- Use ONLY the results above.\n- Provide up to 10 relevant links (titles if present).\n- Include a short Sources section with the URL(s).\n- If still missing critical info, emit exactly one <search_web query=\"...\" /> and stop.`;
 					await sse.writeStatus(PHASE_WRITE, "detailed");
 				} else {
 
@@ -623,13 +624,13 @@ export async function postChat(req: Request) {
 							else void sse.writeStatus(phase(PHASE_READ, index, total, url), "detailed");
 						},
 					});
-					urlContext = `${urlContext}\n\n## Next step\n- Use ONLY the sources above for factual claims.\n- You may briefly say you checked the most recent available information.\n- Do NOT output <search_web .../>. Answer the user now. If critical info is still missing, ask one precise question (or request a direct URL) instead of looping.`;
+					urlContext = `${urlContext}\n\n## Next step\n- Use ONLY the sources above for factual claims.\n- You may briefly say you checked the most recent available information.\n- If critical info is still missing, emit exactly one <search_web query=\"...\" /> and stop (do not ask for permission).`;
 					await sse.writeStatus(PHASE_WRITE, "detailed");
 				}
 			}
 
-			const effectiveSystemPrompt = urlContext ? `${baseSystemPrompt}\n\n${urlContext}` : systemPromptWithTools;
-			const allowToolCalls = !urlContext;
+			const effectiveSystemPrompt = urlContext ? `${systemPromptWithTools}\n\n${urlContext}` : systemPromptWithTools;
+			const allowToolCalls = true;
 
 			await runModelStreamWithToolSupport({
 				model: body.model,
@@ -746,7 +747,7 @@ export async function postChat(req: Request) {
 							fetchedAt: lastSearch.fetchedAt,
 							results: lastSearch.results,
 						});
-						injectedUrlContext = `${injectedUrlContext}\n\n## Next step\n- Use ONLY the results above.\n- Provide up to 10 relevant links (titles if present).\n- You may briefly say you checked the most recent available information.\n- Do not request more web searches; answer now.`;
+						injectedUrlContext = `${injectedUrlContext}\n\n## Next step\n- Use ONLY the results above.\n- Provide up to 10 relevant links (titles if present).\n- Include a short Sources section with the URL(s).\n- If still missing critical info, emit exactly one <search_web query=\"...\" /> and stop.`;
 						await sse.writeStatus(PHASE_WRITE, "detailed");
 						return injectedUrlContext;
 					}
@@ -762,7 +763,7 @@ export async function postChat(req: Request) {
 							else void sse.writeStatus(phase(PHASE_READ, index, total, url), "detailed");
 						},
 					});
-					injectedUrlContext = `${injectedUrlContext}\n\n## Next step\n- Use ONLY the sources above for factual claims.\n- You may briefly say you checked the most recent available information.\n- Do NOT output <search_web .../>. Answer the user now. If critical info is still missing, ask one precise question (or request a direct URL) instead of looping.`;
+					injectedUrlContext = `${injectedUrlContext}\n\n## Next step\n- Use ONLY the sources above for factual claims.\n- You may briefly say you checked the most recent available information.\n- If critical info is still missing, emit exactly one <search_web query=\"...\" /> and stop (do not ask for permission).`;
 					await sse.writeStatus(PHASE_WRITE, "detailed");
 					return injectedUrlContext;
 				},

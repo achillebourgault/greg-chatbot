@@ -26,7 +26,12 @@ function safeData(data: Record<string, unknown> | undefined): Record<string, unk
 }
 
 function enabled(): boolean {
-	if (process.env.GREG_ENABLE_LOGS === "1") return true;
+	const raw = process.env.GREG_ENABLE_LOGS;
+	if (raw != null) {
+		const v = raw.trim().toLowerCase();
+		if (["1", "true", "yes", "y", "on"].includes(v)) return true;
+		if (["0", "false", "no", "n", "off"].includes(v)) return false;
+	}
 	// Default: enabled in dev only.
 	return process.env.NODE_ENV !== "production";
 }

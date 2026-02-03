@@ -32,6 +32,14 @@ export function sanitizeAssistantDelta(delta: string): string {
 	out = out.replace(/\bYeah it\s*['’]?s Greg\.?\b/gi, "");
 	// Remove internal sources if the model accidentally copies them.
 	out = out.replace(/<internal_sources>[\s\S]*?<\/internal_sources>/gi, "");
+	// Also strip common web-search dump headings if they leak without tags.
+	out = out.replace(/^\s*##\s*Web search results \(server-extracted\)\s*$/gim, "");
+	out = out.replace(/^\s*(Query|Fetched at|Rules|Results)\s*:\s*.*$/gim, "");
+	out = out.replace(/^\s*-\s+Treat these results as the only verified external references available\.?\s*$/gim, "");
+	out = out.replace(/^\s*-\s+Prefer the most relevant results first[\s\S]*$/gim, "");
+	out = out.replace(/^\s*-\s+You may list these URLs\.[\s\S]*$/gim, "");
+	out = out.replace(/^\s*-\s+In the final answer, include a short Sources section[\s\S]*$/gim, "");
+	out = out.replace(/^\s*-\s+Never copy\/paste this block verbatim into the final answer; it is internal context\.?\s*$/gim, "");
 	out = out.replace(/\bURL sources \(server-extracted\)\b\s*/gi, "");
 	out = out.replace(/^\s*##\s*URL sources \(server-extracted\)\s*$/gim, "");
 	// Strip common internal dump lines if they appear.
